@@ -4,10 +4,19 @@
  *        movement (including volumetric movement, surface movement and Free From 
  *        technique definition). The subroutines and functions are in 
  *        the <i>grid_movement_structure.cpp</i> file.
- * \author Aerospace Design Laboratory (Stanford University) <http://su2.stanford.edu>.
- * \version 3.2.3 "eagle"
+ * \author F. Palacios, T. Economon, S. Padron
+ * \version 3.2.8.2 "eagle"
  *
- * SU2, Copyright (C) 2012-2014 Aerospace Design Laboratory (ADL).
+ * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ *                      Dr. Thomas D. Economon (economon@stanford.edu).
+ *
+ * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
+ *                 Prof. Piero Colonna's group at Delft University of Technology.
+ *                 Prof. Nicolas R. Gauger's group at Kaiserslautern University of Technology.
+ *                 Prof. Alberto Guardone's group at Polytechnic University of Milan.
+ *                 Prof. Rafael Palacios' group at Imperial College London.
+ *
+ * Copyright (C) 2012-2015 SU2, the open-source CFD code.
  *
  * SU2 is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,8 +55,8 @@ using namespace std;
  * \class CGridMovement
  * \brief Class for moving the surface and volumetric 
  *        numerical grid (2D and 3D problems).
- * \author F. Palacios.
- * \version 3.2.3 "eagle"
+ * \author F. Palacios
+ * \version 3.2.8.2 "eagle"
  */
 class CGridMovement {
 public:
@@ -76,7 +85,7 @@ public:
  * \class CFreeFormDefBox
  * \brief Class for defining the free form FFDBox structure.
  * \author F. Palacios & A. Galdran.
- * \version 3.2.3 "eagle"
+ * \version 3.2.8.2 "eagle"
  */
 class CFreeFormDefBox : public CGridMovement {
 public:
@@ -422,7 +431,7 @@ public:
 	 * \param[in] it_max - Maximal number of iterations.
 	 * \return Parametric coordinates of the point.
 	 */
-	double *GetParametricCoord_Iterative(double *xyz, double *guess, CConfig *config);
+	double *GetParametricCoord_Iterative(unsigned long iPoint, double *xyz, double *guess, CConfig *config);
 	
 	/*! 
 	 * \brief Compute the cross product.
@@ -529,14 +538,6 @@ public:
 	 * \return Value of the Derivative of the Bernstein polynomial.
 	 */		
 	double GetBernsteinDerivative(short val_n, short val_i, double val_t, short val_order);
-	
-  /*!
-	 * \brief The routine computes F(u,v,w)=||X(u,v,w)-(x,y,z)||^2  evaluated at (u,v,w).
-	 * \param[in] val_coord - Parametric coordiates of the target point.
-	 * \param[in] xyz - Cartesians coordinates of the point.
-	 * \return Value of the analytical objective function.
-	 */
-	double GetFFDObjFunc(double *val_coord, double *xyz);
   
 	/*! 
 	 * \brief The routine computes the gradient of F(u,v,w)=||X(u,v,w)-(x,y,z)||^2  evaluated at (u,v,w).
@@ -681,7 +682,7 @@ public:
  * \class CVolumetricMovement
  * \brief Class for moving the volumetric numerical grid.
  * \author F. Palacios, A. Bueno, T. Economon, S. Padron.
- * \version 3.2.3 "eagle"
+ * \version 3.2.8.2 "eagle"
  */
 class CVolumetricMovement : public CGridMovement {
 protected:
@@ -740,7 +741,7 @@ public:
 	 * \brief Build the stiffness matrix for a 3-D hexahedron element. The result will be placed in StiffMatrix_Elem.
 	 * \param[in] geometry - Geometrical definition of the problem.
    * \param[in] StiffMatrix_Elem - Element stiffness matrix to be filled.
-	 * \param[in] CoordCorners[8][3] - Index value for Node 1 of the current hexahedron.
+	 * \param[in] CoordCorners - Index value for Node 1 of the current hexahedron.
 	 */
   void SetFEA_StiffMatrix3D(CGeometry *geometry, CConfig *config, double **StiffMatrix_Elem, unsigned long PointCorners[8], double CoordCorners[8][3], unsigned short nNodes, double scale);
 	
@@ -748,7 +749,7 @@ public:
 	 * \brief Build the stiffness matrix for a 3-D hexahedron element. The result will be placed in StiffMatrix_Elem.
 	 * \param[in] geometry - Geometrical definition of the problem.
    * \param[in] StiffMatrix_Elem - Element stiffness matrix to be filled.
-	 * \param[in] CoordCorners[8][3] - Index value for Node 1 of the current hexahedron.
+	 * \param[in] CoordCorners - Index value for Node 1 of the current hexahedron.
 	 */
   void SetFEA_StiffMatrix2D(CGeometry *geometry, CConfig *config, double **StiffMatrix_Elem, unsigned long PointCorners[8], double CoordCorners[8][3], unsigned short nNodes, double scale);
   
@@ -757,48 +758,47 @@ public:
    * \param[in] Xi - Local coordinates.
    * \param[in] Eta - Local coordinates.
    * \param[in] Mu - Local coordinates.
-	 * \param[in] CoordCorners[8][3] - Coordiantes of the corners.
-   * \param[in] shp[8][4] - Shape function information
+	 * \param[in] CoordCorners - Coordiantes of the corners.
+   * \param[in] DShapeFunction - Shape function information
 	 */
-  double ShapeFunc_Hexa(double Xi, double Eta, double Mu, double CoordCorners[8][3], double DShapeFunction[8][4]);
+  double ShapeFunc_Hexa(double Xi, double Eta, double Zeta, double CoordCorners[8][3], double DShapeFunction[8][4]);
   
   /*!
 	 * \brief Shape functions and derivative of the shape functions
    * \param[in] Xi - Local coordinates.
    * \param[in] Eta - Local coordinates.
    * \param[in] Mu - Local coordinates.
-	 * \param[in] CoordCorners[8][3] - Coordiantes of the corners.
-   * \param[in] shp[8][4] - Shape function information
+	 * \param[in] CoordCorners - Coordiantes of the corners.
+   * \param[in] DShapeFunction - Shape function information
 	 */
-  double ShapeFunc_Tetra(double Xi, double Eta, double Mu, double CoordCorners[8][3], double DShapeFunction[8][4]);
+  double ShapeFunc_Tetra(double Xi, double Eta, double Zeta, double CoordCorners[8][3], double DShapeFunction[8][4]);
   
   /*!
 	 * \brief Shape functions and derivative of the shape functions
    * \param[in] Xi - Local coordinates.
    * \param[in] Eta - Local coordinates.
    * \param[in] Mu - Local coordinates.
-	 * \param[in] CoordCorners[8][3] - Coordiantes of the corners.
-   * \param[in] shp[8][4] - Shape function information
+	 * \param[in] CoordCorners - Coordiantes of the corners.
+   * \param[in] DShapeFunction - Shape function information
 	 */
-  double ShapeFunc_Pyram(double Xi, double Eta, double Mu, double CoordCorners[8][3], double DShapeFunction[8][4]);
+  double ShapeFunc_Pyram(double Xi, double Eta, double Zeta, double CoordCorners[8][3], double DShapeFunction[8][4]);
   
   /*!
 	 * \brief Shape functions and derivative of the shape functions
    * \param[in] Xi - Local coordinates.
    * \param[in] Eta - Local coordinates.
    * \param[in] Mu - Local coordinates.
-	 * \param[in] CoordCorners[8][3] - Coordiantes of the corners.
-   * \param[in] shp[8][4] - Shape function information
+	 * \param[in] CoordCorners - Coordiantes of the corners.
+   * \param[in] DShapeFunction - Shape function information
 	 */
-  double ShapeFunc_Wedge(double Xi, double Eta, double Mu, double CoordCorners[8][3], double DShapeFunction[8][4]);
+  double ShapeFunc_Wedge(double Xi, double Eta, double Zeta, double CoordCorners[8][3], double DShapeFunction[8][4]);
   
   /*!
 	 * \brief Shape functions and derivative of the shape functions
    * \param[in] Xi - Local coordinates.
    * \param[in] Eta - Local coordinates.
-   * \param[in] Mu - Local coordinates.
-	 * \param[in] CoordCorners[8][3] - Coordiantes of the corners.
-   * \param[in] shp[8][4] - Shape function information
+	 * \param[in] CoordCorners - Coordiantes of the corners.
+   * \param[in] DShapeFunction - Shape function information
 	 */
   double ShapeFunc_Triangle(double Xi, double Eta, double CoordCorners[8][3], double DShapeFunction[8][4]);
   
@@ -806,45 +806,44 @@ public:
 	 * \brief Shape functions and derivative of the shape functions
    * \param[in] Xi - Local coordinates.
    * \param[in] Eta - Local coordinates.
-   * \param[in] Mu - Local coordinates.
-	 * \param[in] CoordCorners[8][3] - Coordiantes of the corners.
-   * \param[in] shp[8][4] - Shape function information
+	 * \param[in] CoordCorners - Coordiantes of the corners.
+   * \param[in] DShapeFunction - Shape function information
 	 */
   double ShapeFunc_Rectangle(double Xi, double Eta, double CoordCorners[8][3], double DShapeFunction[8][4]);
   
   /*!
 	 * \brief Compute the shape functions for hexahedron
-	 * \param[in] HexaCorners[8][3] - coordinates of the cornes of the hexahedron.
+	 * \param[in] CoordCorners - coordinates of the cornes of the hexahedron.
 	 */
   double GetHexa_Volume(double CoordCorners[8][3]);
   
   /*!
 	 * \brief Compute the shape functions for hexahedron
-	 * \param[in] TetCorners[4][3] - coordinates of the cornes of the hexahedron.
+	 * \param[in] CoordCorners - coordinates of the cornes of the hexahedron.
 	 */
   double GetTetra_Volume(double CoordCorners[8][3]);
   
   /*!
 	 * \brief Compute the shape functions for hexahedron
-	 * \param[in] TetCorners[4][3] - coordinates of the cornes of the hexahedron.
+	 * \param[in] CoordCorners - coordinates of the cornes of the hexahedron.
 	 */
   double GetWedge_Volume(double CoordCorners[8][3]);
   
   /*!
 	 * \brief Compute the shape functions for hexahedron
-	 * \param[in] TetCorners[4][3] - coordinates of the cornes of the hexahedron.
+	 * \param[in] CoordCorners - coordinates of the cornes of the hexahedron.
 	 */
   double GetPyram_Volume(double CoordCorners[8][3]);
   
   /*!
 	 * \brief Compute the shape functions for hexahedron
-	 * \param[in] TetCorners[4][3] - coordinates of the cornes of the hexahedron.
+	 * \param[in] CoordCorners - coordinates of the cornes of the hexahedron.
 	 */
   double GetTriangle_Area(double CoordCorners[8][3]);
   
   /*!
 	 * \brief Compute the shape functions for hexahedron
-	 * \param[in] TetCorners[4][3] - coordinates of the cornes of the hexahedron.
+	 * \param[in] CoordCorners - coordinates of the cornes of the hexahedron.
 	 */
   double GetRectangle_Area(double CoordCorners[8][3]);
     
@@ -852,10 +851,8 @@ public:
 	 * \brief Add the stiffness matrix for a 2-D triangular element to the global stiffness matrix for the entire mesh (node-based).
 	 * \param[in] geometry - Geometrical definition of the problem.
    * \param[in] StiffMatrix_Elem - Element stiffness matrix to be filled.
-	 * \param[in] val_Point_0 - Index value for Node 0 of the current tetrahedron.
-   * \param[in] val_Point_1 - Index value for Node 1 of the current tetrahedron.
-   * \param[in] val_Point_2 - Index value for Node 2 of the current tetrahedron.
-   * \param[in] val_Point_3 - Index value for Node 3 of the current tetrahedron.
+   * \param[in] PointCorners
+   * \param[in] nNodes
 	 */
   void AddFEA_StiffMatrix(CGeometry *geometry, double **StiffMatrix_Elem, unsigned long PointCorners[8], unsigned short nNodes);
   
@@ -932,7 +929,16 @@ public:
   
   /*!
 	 * \brief Compute the determinant of a 3 by 3 matrix.
-	 * \param[in] val_matrix 3 by 3 matrix.
+	 * 3 by 3 matrix elements
+	 * \param[in] A00
+	 * \param[in] A01
+	 * \param[in] A02
+	 * \param[in] A10
+	 * \param[in] A11
+	 * \param[in] A12
+	 * \param[in] A20
+	 * \param[in] A21
+	 * \param[in] A22
 	 * \result Determinant of the matrix
 	 */
 	double Determinant_3x3(double A00, double A01, double A02, double A10, double A11, double A12, double A20, double A21, double A22);
@@ -943,7 +949,7 @@ public:
  * \class CSurfaceMovement
  * \brief Class for moving the surface numerical grid.
  * \author F. Palacios, T. Economon.
- * \version 3.2.3 "eagle"
+ * \version 3.2.8.2 "eagle"
  */
 class CSurfaceMovement : public CGridMovement {
 protected:
@@ -951,6 +957,11 @@ protected:
 	unsigned short nFFDBox;	/*!< \brief Number of FFD FFDBoxes. */
 	unsigned short nLevel;	/*!< \brief Level of the FFD FFDBoxes (parent/child). */
 	bool FFDBoxDefinition;	/*!< \brief If the FFD FFDBox has been defined in the input file. */
+  vector<double> GlobalCoordX[MAX_NUMBER_FFD];
+  vector<double> GlobalCoordY[MAX_NUMBER_FFD];
+  vector<double> GlobalCoordZ[MAX_NUMBER_FFD];
+  vector<string> GlobalTag[MAX_NUMBER_FFD];
+  vector<unsigned long> GlobalPoint[MAX_NUMBER_FFD];
 
 public:
 	
@@ -973,33 +984,6 @@ public:
 	 */
 	void SetHicksHenne(CGeometry *boundary, CConfig *config, unsigned short iDV, bool ResetDef);
   
-  /*!
-	 * \brief Set a spherical design problem.
-	 * \param[in] boundary - Geometry of the boundary.
-	 * \param[in] config - Definition of the particular problem.
-	 * \param[in] iDV - Index of the design variable.
-	 * \param[in] ResetDef - Reset the deformation before starting a new one.
-	 */
-	void SetSpherical(CGeometry *boundary, CConfig *config, unsigned short iDV, bool ResetDef);
-	
-  /*!
-	 * \brief Set a Hicks-Henne deformation bump functions on an airfoil.
-	 * \param[in] boundary - Geometry of the boundary.
-	 * \param[in] config - Definition of the particular problem.
-	 * \param[in] iDV - Index of the design variable.
-	 * \param[in] ResetDef - Reset the deformation before starting a new one.
-	 */
-	void SetCosBump(CGeometry *boundary, CConfig *config, unsigned short iDV, bool ResetDef);
-  
-  /*!
-	 * \brief Set a Hicks-Henne deformation bump functions on an airfoil.
-	 * \param[in] boundary - Geometry of the boundary.
-	 * \param[in] config - Definition of the particular problem.
-	 * \param[in] iDV - Index of the design variable.
-	 * \param[in] ResetDef - Reset the deformation before starting a new one.
-	 */
-	void SetFourier(CGeometry *boundary, CConfig *config, unsigned short iDV, bool ResetDef);
-  
 	/*! 
 	 * \brief Set a NACA 4 digits airfoil family for airfoil deformation.
 	 * \param[in] boundary - Geometry of the boundary.
@@ -1013,13 +997,6 @@ public:
 	 * \param[in] config - Definition of the particular problem.
 	 */
 	void SetParabolic(CGeometry *boundary, CConfig *config);
-	
-	/*! 
-	 * \brief Set a obstacle in a channel.
-	 * \param[in] boundary - Geometry of the boundary.
-	 * \param[in] config - Definition of the particular problem.
-	 */
-	void SetObstacle(CGeometry *boundary, CConfig *config);
 	
   /*!
 	 * \brief Set a obstacle in a channel.
@@ -1109,14 +1086,14 @@ public:
 	
   /*! 
 	 * \brief Set the collective pitch for a blade surface movement.
-	 * \param[in] boundary - Geometry of the boundary.
+	 * \param[in] geometry - Geometrical definition of the problem.
 	 * \param[in] config - Definition of the particular problem.
 	 */
   void SetCollective_Pitch(CGeometry *geometry, CConfig *config);
   
   /*! 
 	 * \brief Set any surface deformationsbased on an input file.
-	 * \param[in] boundary - Geometry of the boundary.
+	 * \param[in] geometry - Geometrical definition of the problem.
 	 * \param[in] config - Definition of the particular problem.
    * \param[in] iZone - Zone number in the mesh.
    * \param[in] iter - Current physical time iteration.
@@ -1130,8 +1107,17 @@ public:
 	 * \param[in] iDV - Index of the design variable.
 	 * \param[in] ResetDef - Reset the deformation before starting a new one.
 	 */
-	void SetDisplacement(CGeometry *boundary, CConfig *config, unsigned short iDV, bool ResetDef);
-	
+	void SetTranslation(CGeometry *boundary, CConfig *config, unsigned short iDV, bool ResetDef);
+
+  /*!
+   * \brief Set a displacement for surface movement.
+   * \param[in] boundary - Geometry of the boundary.
+   * \param[in] config - Definition of the particular problem.
+   * \param[in] iDV - Index of the design variable.
+   * \param[in] ResetDef - Reset the deformation before starting a new one.
+   */
+  void SetScale(CGeometry *boundary, CConfig *config, unsigned short iDV, bool ResetDef);
+
 	/*! 
 	 * \brief Copy the boundary coordinates to each vertex.
 	 * \param[in] geometry - Geometrical definition of the problem.
@@ -1161,6 +1147,7 @@ public:
 	 * \param[in] geometry - Geometrical definition of the problem.
 	 * \param[in] config - Definition of the particular problem.
 	 * \param[in] FFDBox - Array with all the free forms FFDBoxes of the computation.
+	 * \param[in] iFFDBox - _____________________.
 	 */		
 	void UpdateParametricCoord(CGeometry *geometry, CConfig *config, CFreeFormDefBox *FFDBox, unsigned short iFFDBox);
 	
@@ -1168,7 +1155,8 @@ public:
 	 * \brief _____________________.
 	 * \param[in] geometry - _____________________.
 	 * \param[in] config - _____________________.
-	 * \param[in] FFDBox - _____________________.
+	 * \param[in] FFDBoxParent - _____________________.
+	 * \param[in] FFDBoxChild - _____________________.
 	 */	
 	void SetParametricCoordCP(CGeometry *geometry, CConfig *config, CFreeFormDefBox *FFDBoxParent, CFreeFormDefBox *FFDBoxChild);
 	
@@ -1176,7 +1164,8 @@ public:
 	 * \brief _____________________.
 	 * \param[in] geometry - _____________________.
 	 * \param[in] config - _____________________.
-	 * \param[in] FFDBox - _____________________.
+	 * \param[in] FFDBoxParent - _____________________.
+   * \param[in] FFDBoxChild - _____________________.
 	 */	
 	void GetCartesianCoordCP(CGeometry *geometry, CConfig *config, CFreeFormDefBox *FFDBoxParent, CFreeFormDefBox *FFDBoxChild);
 
@@ -1185,6 +1174,7 @@ public:
 	 * \param[in] geometry - Geometrical definition of the problem.
 	 * \param[in] config - Definition of the particular problem.
 	 * \param[in] FFDBox - Array with all the free forms FFDBoxes of the computation.
+	 * \param[in] iFFDBox - _____________________.
 	 */		
 	void SetCartesianCoord(CGeometry *geometry, CConfig *config, CFreeFormDefBox *FFDBox, unsigned short iFFDBox);
 	
@@ -1197,7 +1187,7 @@ public:
 	 * \param[in] ResetDef - Reset the deformation before starting a new one.
 	 */
 	void SetFFDCPChange_2D(CGeometry *geometry, CConfig *config, CFreeFormDefBox *FFDBox, unsigned short iDV, bool ResetDef);
-  
+
 	/*! 
 	 * \brief Set the deformation of the Free From box using the control point position.
 	 * \param[in] geometry - Geometrical definition of the problem.
@@ -1296,27 +1286,34 @@ public:
 	 * \param[in] geometry - Geometrical definition of the problem.
 	 * \param[in] FFDBox - Array with all the free forms FFDBoxes of the computation.
 	 * \param[in] val_mesh_filename - Name of the grid input file.
-   * \param[in] val_vertex - With vertex information.
-	 */		
-	void ReadFFDInfo(CGeometry *geometry, CConfig *config, CFreeFormDefBox **FFDBox, string val_mesh_filename, bool val_fullmesh);
+	 */
+	void ReadFFDInfo(CGeometry *geometry, CConfig *config, CFreeFormDefBox **FFDBox, string val_mesh_filename);
 	
+  /*!
+   * \brief Read the free form information from the grid input file.
+   * \note If there is no control point information, and no parametric
+   *       coordinates information, the code will compute that information.
+   * \param[in] config - Definition of the particular problem.
+   * \param[in] geometry - Geometrical definition of the problem.
+   * \param[in] FFDBox - Array with all the free forms FFDBoxes of the computation.
+   */
+  void ReadFFDInfo(CGeometry *geometry, CConfig *config, CFreeFormDefBox **FFDBox);
+  
+  /*!
+   * \brief Merge the Free Form information in the SU2 file.
+   * \param[in] config - Definition of the particular problem.
+   * \param[in] geometry - Geometrical definition of the problem.
+   * \param[in] val_mesh_filename - Name of the grid output file.
+   */
+  void MergeFFDInfo(CGeometry *geometry, CConfig *config);
+  
 	/*! 
 	 * \brief Write the Free Form information in the SU2 file.
 	 * \param[in] config - Definition of the particular problem.
 	 * \param[in] geometry - Geometrical definition of the problem.
-	 * \param[in] FFDBox - Array with all the free forms FFDBoxes of the computation.
 	 * \param[in] val_mesh_filename - Name of the grid output file.
 	 */		
-	void WriteFFDInfo(CGeometry *geometry, CConfig *config, string val_mesh_filename);
-  
-  /*!
-	 * \brief Write the Free Form information in the SU2 file.
-	 * \param[in] config - Definition of the particular problem.
-	 * \param[in] geometry - Geometrical definition of the problem.
-	 * \param[in] FFDBox - Array with all the free forms FFDBoxes of the computation.
-	 * \param[in] val_mesh_filename - Name of the grid output file.
-	 */
-	void WriteFFDInfo(CGeometry *geometry, CConfig *config, CFreeFormDefBox **FFDBox, string val_mesh_filename);
+	void WriteFFDInfo(CGeometry *geometry, CConfig *config);
 	
 	/*! 
 	 * \brief Get information about if there is a complete FFDBox definition, or it is necessary to 

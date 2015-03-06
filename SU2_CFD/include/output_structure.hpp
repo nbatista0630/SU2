@@ -2,10 +2,17 @@
  * \file output_structure.hpp
  * \brief Headers of the main subroutines for generating the file outputs.
  *        The subroutines and functions are in the <i>output_structure.cpp</i> file.
- * \author Aerospace Design Laboratory (Stanford University) <http://su2.stanford.edu>.
- * \version 3.2.3 "eagle"
+ * \author F. Palacios, T. Economon, M. Colonno
+ * \version 3.2.8.2 "eagle"
  *
- * SU2, Copyright (C) 2012-2014 Aerospace Design Laboratory (ADL).
+ * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ *                      Dr. Thomas D. Economon (economon@stanford.edu).
+ *
+ * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
+ *                 Prof. Piero Colonna's group at Delft University of Technology.
+ *                 Prof. Nicolas R. Gauger's group at Kaiserslautern University of Technology.
+ *                 Prof. Alberto Guardone's group at Polytechnic University of Milan.
+ *                 Prof. Rafael Palacios' group at Imperial College London.
  *
  * SU2 is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -49,7 +56,7 @@ using namespace std;
  * \brief Class for writing the flow, adjoint and linearized solver 
  *        solution (including the history solution, and parallel stuff).
  * \author F. Palacios, T. Economon, M. Colonno.
- * \version 3.2.3 "eagle"
+ * \version 3.2.8.2 "eagle"
  */
 class COutput {
 
@@ -82,8 +89,9 @@ class COutput {
 	double **residuals, **consv_vars;					// placeholders
 	double *p, *rho, *M, *Cp, *Cf, *Ch, *h, *yplus;		// placeholders 
 	unsigned short nVar_Consv, nVar_Total, nVar_Extra, nZones;
-	bool wrote_base_file, wrote_surf_file, wrote_CGNS_base, wrote_Tecplot_base, wrote_Paraview_base;
-
+	bool wrote_surf_file, wrote_CGNS_base, wrote_Tecplot_base, wrote_Paraview_base;
+  unsigned short wrote_base_file;
+  double RhoRes_New, RhoRes_Old;
   int cgns_base, cgns_zone, cgns_base_results, cgns_zone_results;
   
 protected:
@@ -127,7 +135,15 @@ public:
 	void SetBaselineResult_Files(CSolver **solver, CGeometry **geometry, CConfig **config,
                                unsigned long iExtIter, unsigned short val_nZone);
   
-	/*! 
+  /*!
+   * \brief Writes and organizes the all the output files, except the history one, for serial computations.
+   * \param[in] geometry - Geometrical definition of the problem.
+   * \param[in] config - Definition of the particular problem.
+   * \param[in] val_nZone - Total number of domains in the grid file.
+   */
+  void SetMesh_Files(CGeometry **geometry, CConfig **config, unsigned short val_nZone, bool new_file, bool su2_file);
+
+	/*!
 	 * \brief Writes equivalent area.
 	 * \param[in] solver_container - Container vector with all the solutions.
 	 * \param[in] geometry - Geometrical definition of the problem.
@@ -175,7 +191,16 @@ public:
 	 * \param[in] iExtIter - Current external (time) iteration.
 	 */
   void OneDimensionalOutput(CSolver *solver_container, CGeometry *geometry, CConfig *config);
-	
+
+  /*!
+   * \brief Writes mass flow rate output at monitored marker.
+   * \param[in] solver_container - Container vector with all the solutions.
+   * \param[in] geometry - Geometrical definition of the problem.
+   * \param[in] config - Definition of the particular problem.
+   * \param[in] iExtIter - Current external (time) iteration.
+   */
+  void SetMassFlowRate(CSolver *solver_container, CGeometry *geometry, CConfig *config);
+
 	/*! 
 	 * \brief Create and write the file with the flow coefficient on the surface.
 	 * \param[in] config - Definition of the particular problem.
@@ -295,8 +320,23 @@ public:
    * \param[in] val_iZone - Current zone.
    * \param[in] val_nZone - Total number of zones.
 	 */
-	void SetParaview_ASCII(CConfig *config, CGeometry *geometry, unsigned short val_iZone, unsigned short val_nZone, bool surf_sol);
-  
+  void SetParaview_ASCII(CConfig *config, CGeometry *geometry, unsigned short val_iZone, unsigned short val_nZone, bool surf_sol);
+
+  /*!
+	 * \brief Write a Paraview ASCII solution file.
+	 * \param[in] config - Definition of the particular problem.
+	 * \param[in] geometry - Geometrical definition of the problem.
+   * \param[in] val_iZone - Current zone.
+   * \param[in] val_nZone - Total number of zones.
+	 */
+	void SetParaview_MeshASCII(CConfig *config, CGeometry *geometry, unsigned short val_iZone, unsigned short val_nZone, bool surf_sol);
+
+  /*!
+	 * \brief Write a Tecplot ASCII solution file.
+	 * \param[in] geometry - Geometrical definition of the problem.
+	 */
+	void SetTecplotNode_ASCII(CConfig *config, CGeometry *geometry, CSolver **solver, char mesh_filename[MAX_STRING_SIZE], bool surf_sol);
+
   /*!
 	 * \brief Write a Tecplot ASCII solution file.
 	 * \param[in] config - Definition of the particular problem.
@@ -307,12 +347,36 @@ public:
 	void SetTecplot_ASCII(CConfig *config, CGeometry *geometry,CSolver **solver, unsigned short val_iZone, unsigned short val_nZone, bool surf_sol);
   
   /*!
+   * \brief Write the nodal coordinates and connectivity to a Tecplot binary mesh file.
+   * \param[in] config - Definition of the particular problem.
+   * \param[in] geometry - Geometrical definition of the problem.
+   * \param[in] val_iZone - iZone index.
+   */
+  void SetTecplot_MeshASCII(CConfig *config, CGeometry *geometry, bool surf_sol, bool new_file);
+
+  /*!
+   * \brief Write the nodal coordinates and connectivity to a Tecplot binary mesh file.
+   * \param[in] config - Definition of the particular problem.
+   * \param[in] geometry - Geometrical definition of the problem.
+   * \param[in] val_iZone - iZone index.
+   */
+  void SetSU2_MeshASCII(CConfig *config, CGeometry *geometry);
+  
+  /*!
+   * \brief Write the nodal coordinates and connectivity to a Tecplot binary mesh file.
+   * \param[in] config - Definition of the particular problem.
+   * \param[in] geometry - Geometrical definition of the problem.
+   * \param[in] val_iZone - iZone index.
+   */
+  void SetSU2_MeshBinary(CConfig *config, CGeometry *geometry);
+
+  /*!
 	 * \brief Write the nodal coordinates and connectivity to a Tecplot binary mesh file.
 	 * \param[in] config - Definition of the particular problem.
 	 * \param[in] geometry - Geometrical definition of the problem.
    * \param[in] val_iZone - iZone index.
 	 */
-	void SetTecplot_Mesh(CConfig *config, CGeometry *geometry, unsigned short val_iZone);
+	void SetTecplot_MeshBinary(CConfig *config, CGeometry *geometry, unsigned short val_iZone);
   
   /*!
 	 * \brief Write the coordinates and connectivity to a Tecplot binary surface mesh file.
@@ -364,7 +428,7 @@ public:
 	 * \param[in] ConvHist_file - Pointer to the convergence history file (which is defined in the main subroutine).
 	 * \param[in] config - Definition of the particular problem.
 	 */
-	void SetHistory_Header(ofstream *ConvHist_file, CConfig *config);
+	void SetConvHistory_Header(ofstream *ConvHist_file, CConfig *config);
 
 	/*! 
 	 * \brief Write the history file and the convergence on the screen for serial computations.
@@ -377,7 +441,34 @@ public:
 	 * \param[in] timeused - Current number of clock tick in the computation (related with total time).
 	 * \param[in] val_nZone - iZone index.
 	 */
-	void SetConvergence_History(ofstream *ConvHist_file, CGeometry ***geometry, CSolver ****solver_container, CConfig **config,
+	void SetConvHistory_Body(ofstream *ConvHist_file, CGeometry ***geometry, CSolver ****solver_container, CConfig **config,
                               CIntegration ***integration, bool DualTime, double timeused, unsigned short val_iZone);
-
+  
+  /*!
+   * \brief Write the history file and the convergence on the screen for serial computations.
+   * \param[in] ConvHist_file - Pointer to the convergence history file (which is defined in the main subroutine).
+   * \param[in] geometry - Geometrical definition of the problem.
+   * \param[in] solver_container - Container vector with all the solutions.
+   * \param[in] config - Definition of the particular problem.
+   * \param[in] integration - Generic subroutines for space integration, time integration, and monitoring.
+   * \param[in] iExtIter - Current external (time) iteration.
+   * \param[in] timeused - Current number of clock tick in the computation (related with total time).
+   * \param[in] val_nZone - iZone index.
+   */
+  void SetForces_Breakdown(CGeometry ***geometry, CSolver ****solver_container, CConfig **config,
+                           CIntegration ***integration, unsigned short val_iZone);
+  
+  /*!
+   * \brief Write the history file and the convergence on the screen for serial computations.
+   * \param[in] ConvHist_file - Pointer to the convergence history file (which is defined in the main subroutine).
+   * \param[in] geometry - Geometrical definition of the problem.
+   * \param[in] solver_container - Container vector with all the solutions.
+   * \param[in] config - Definition of the particular problem.
+   * \param[in] integration - Generic subroutines for space integration, time integration, and monitoring.
+   * \param[in] iExtIter - Current external (time) iteration.
+   * \param[in] timeused - Current number of clock tick in the computation (related with total time).
+   * \param[in] val_nZone - iZone index.
+   */
+  void SetCFL_Number(CSolver ****solver_container, CConfig **config, unsigned short val_iZone);
+  
 };
