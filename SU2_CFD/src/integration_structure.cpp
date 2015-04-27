@@ -2,9 +2,9 @@
  * \file integration_structure.cpp
  * \brief This subroutine includes the space and time integration structure
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -36,6 +36,7 @@ CIntegration::CIntegration(CConfig *config) {
 	New_Func = 0;
 	Cauchy_Counter = 0;
 	Convergence = false;
+	Convergence_FSI = false;
 	Convergence_FullMG = false;
 	Cauchy_Serie = new double [config->GetCauchy_Elems()+1];
 }
@@ -86,6 +87,10 @@ void CIntegration::Space_Integration(CGeometry *geometry,
   
   solver_container[MainSolver]->BC_ActDisk_Boundary(geometry, solver_container, numerics[CONV_BOUND_TERM], config);
   
+  solver_container[MainSolver]->BC_Interface_Boundary(geometry, solver_container, numerics[CONV_BOUND_TERM], config);
+
+  solver_container[MainSolver]->BC_NearField_Boundary(geometry, solver_container, numerics[CONV_BOUND_TERM], config);
+
   
   /*--- Weak boundary conditions ---*/
   
@@ -109,9 +114,9 @@ void CIntegration::Space_Integration(CGeometry *geometry,
       case RIEMANN_BOUNDARY:
       	if (MainSolver == FLOW_SOL)
       		solver_container[MainSolver]->BC_Riemann(geometry, solver_container, numerics[CONV_BOUND_TERM], numerics[VISC_BOUND_TERM], config, iMarker);
-      	else if (MainSolver == TURB_SOL && config->GetKind_Data_Riemann(config->GetMarker_All_TagBound(iMarker))==TOTAL_CONDITIONS_PT)
+      	else if (MainSolver == TURB_SOL && config->GetKind_Data_Riemann(config->GetMarker_All_TagBound(iMarker)) == TOTAL_CONDITIONS_PT)
       		solver_container[MainSolver]->BC_Inlet(geometry, solver_container, numerics[CONV_BOUND_TERM], numerics[VISC_BOUND_TERM], config, iMarker);
-      	else if (MainSolver == TURB_SOL && config->GetKind_Data_Riemann(config->GetMarker_All_TagBound(iMarker))==STATIC_PRESSURE)
+      	else if (MainSolver == TURB_SOL && config->GetKind_Data_Riemann(config->GetMarker_All_TagBound(iMarker)) == STATIC_PRESSURE)
       		solver_container[MainSolver]->BC_Outlet(geometry, solver_container, numerics[CONV_BOUND_TERM], numerics[VISC_BOUND_TERM], config, iMarker);
       	break;
       case FAR_FIELD:
@@ -128,12 +133,6 @@ void CIntegration::Space_Integration(CGeometry *geometry,
         break;
       case ENGINE_BLEED:
         solver_container[MainSolver]->BC_Engine_Bleed(geometry, solver_container, numerics[CONV_BOUND_TERM], numerics[VISC_BOUND_TERM], config, iMarker);
-        break;
-      case INTERFACE_BOUNDARY:
-        solver_container[MainSolver]->BC_Interface_Boundary(geometry, solver_container, numerics[CONV_BOUND_TERM], config, iMarker);
-        break;
-      case NEARFIELD_BOUNDARY:
-        solver_container[MainSolver]->BC_NearField_Boundary(geometry, solver_container, numerics[CONV_BOUND_TERM], config, iMarker);
         break;
       case ELECTRODE_BOUNDARY:
         solver_container[MainSolver]->BC_Electrode(geometry, solver_container, numerics[CONV_BOUND_TERM], config, iMarker);
@@ -502,8 +501,8 @@ void CIntegration::SetDualTime_Solver(CGeometry *geometry, CSolver *solver, CCon
       if (rank == MASTER_NODE) {
         for (iProcessor = 0; iProcessor < nProcessor; iProcessor++) {
           if (owner_all[iProcessor] == 1) {
-            config->SetAeroelastic_plunge(iMarker_Monitoring,plunge_all[iProcessor]);
-            config->SetAeroelastic_pitch(iMarker_Monitoring,pitch_all[iProcessor]);
+            config->SetAeroelastic_plunge(iMarker_Monitoring, plunge_all[iProcessor]);
+            config->SetAeroelastic_pitch(iMarker_Monitoring, pitch_all[iProcessor]);
             break;
           }
         }
@@ -521,35 +520,108 @@ void CIntegration::SetDualTime_Solver(CGeometry *geometry, CSolver *solver, CCon
   
 }
 
+void CIntegration::SetStructural_Solver(CGeometry *geometry, CSolver *solver, CConfig *config, unsigned short iMesh) {
 
-void CIntegration::Convergence_FSI(CGeometry *geometry, CConfig *config, CSolver *fea_solver, unsigned long Iteration, double monitor) {
+	unsigned long iPoint;
+
+	for (iPoint = 0; iPoint < geometry->GetnPoint(); iPoint++) {
+
+		solver->node[iPoint]->SetSolution_time_n();
+		solver->node[iPoint]->SetSolution_Vel_time_n();
+		solver->node[iPoint]->SetSolution_Accel_time_n();
+
+	}
+
+	  bool fsi = config->GetFSI_Simulation();
+
+	  /*--- If FSI problem, save the last Aitken relaxation parameter of the previous time step ---*/
+
+	  if (fsi){
+
+		  double WAitk=0.0;
+
+		  WAitk = solver->GetWAitken_Dyn();
+		  solver->SetWAitken_Dyn_tn1(WAitk);
+
+	  }
+
+}
+
+
+void CIntegration::Convergence_Monitoring_FSI(CGeometry *fea_geometry, CConfig *fea_config, CSolver *fea_solver, unsigned long iFSIIter) {
 
 	unsigned short iCounter;
-	double FEA_check[2];
+	double FEA_check[2] = {0.0, 0.0};
 	double magResidualFSI, logResidualFSI_initial, logResidualFSI;
 	double magResidualFSI_criteria, logResidualFSI_criteria;
 
+    unsigned long iPoint, iDim;
+    unsigned long nPoint, nDim;
+    double *dispPred, *dispPred_Old;
+	double CurrentTime=fea_config->GetCurrent_DynTime();
+	double Static_Time=fea_config->GetStatic_Time();
+    double deltaU, deltaURad, deltaURes;
 
-//	bool Already_Converged = Convergence;
+   	magResidualFSI_criteria = fea_config->GetOrderMagResidualFSI();
+   	logResidualFSI_criteria = fea_config->GetMinLogResidualFSI();
 
-//	FEA_check[0]=fea_solver->GetFSI_ConvValue(0);
-//	FEA_check[1]=fea_solver->GetFSI_ConvValue(1);
+    deltaURes = 0.0;
 
-//	logResidualFSI_initial=log10(FEA_check[0]);
-//	logResidualFSI=log10(FEA_check[1]);
+	/*--- Only when there is movement it makes sense to check convergence (otherwise, it is always converged...) ---*/
+	/*--- The same with the first iteration, if we are doing strongly coupled we need at least two. ---*/
 
-//	magResidualFSI=fabs(logResidualFSI-logResidualFSI_initial);
+	if ((CurrentTime > Static_Time) && (iFSIIter == 0)) {
+		/*--- Set the convergence values to 0.0 --*/
+		fea_solver->SetFSI_ConvValue(0,0.0);
+		fea_solver->SetFSI_ConvValue(1,0.0);
 
-//	magResidualFSI_criteria=config->GetOrderMagResidualFSI();
-//	logResidualFSI_criteria=config->GetMinLogResidualFSI();
+	}
+	else if ((CurrentTime > Static_Time) && (iFSIIter > 0)) {
 
-//	if ((logResidualFSI < logResidualFSI_criteria) && (magResidualFSI > magResidualFSI_criteria)) SetConvergence(true);
+		nPoint = fea_geometry->GetnPoint();
+		nDim = fea_geometry->GetnDim();
 
-	/*--- This has to be a variable ---*/
+		for (iPoint=0; iPoint < nPoint; iPoint++){
 
+		deltaU = 0.0;
+		deltaURad = 0.0;
 
-//	if (Already_Converged) Convergence = true;
+		dispPred = fea_solver->node[iPoint]->GetSolution_Pred();
+		dispPred_Old = fea_solver->node[iPoint]->GetSolution_Pred_Old();
 
+			for (iDim=0; iDim < nDim; iDim++){
+
+				/*--- Compute the deltaU, and add deltaU2 to deltaURad ---*/
+				deltaU = dispPred[iDim] - dispPred_Old[iDim];
+				deltaURad += deltaU * deltaU;
+
+			}
+
+			/*--- The residual is the maximum of the values of sqrt(deltaURad) computed ---*/
+			deltaURad = sqrt(deltaURad);
+			deltaURes = max(deltaURes, deltaURad);
+
+		}
+
+		if (iFSIIter == 1){
+			fea_solver->SetFSI_ConvValue(0,deltaURes);
+			logResidualFSI_initial = log10(deltaURes);
+
+			if (logResidualFSI_initial < logResidualFSI_criteria) Convergence_FSI = true;
+
+		}
+		else {
+			fea_solver->SetFSI_ConvValue(1,deltaURes);
+			FEA_check[0] = fea_solver->GetFSI_ConvValue(0);
+			logResidualFSI_initial = log10(FEA_check[0]);
+			logResidualFSI = log10(deltaURes);
+
+			magResidualFSI=fabs(logResidualFSI-logResidualFSI_initial);
+
+			if ((logResidualFSI < logResidualFSI_criteria) || (magResidualFSI > magResidualFSI_criteria)) Convergence_FSI = true;
+		}
+
+	}
 
 }
 

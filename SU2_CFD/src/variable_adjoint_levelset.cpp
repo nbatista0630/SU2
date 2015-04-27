@@ -2,9 +2,9 @@
  * \file variable_adjoint_levelset.cpp
  * \brief Definition of the solution fields.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -48,7 +48,7 @@ CAdjLevelSetVariable::CAdjLevelSetVariable(unsigned short val_nDim, unsigned sho
 }
 
 CAdjLevelSetVariable::CAdjLevelSetVariable(double val_levelset, unsigned short val_nDim, unsigned short val_nvar, CConfig *config)
-: CVariable(val_nDim, val_nvar,config) {
+: CVariable(val_nDim, val_nvar, config) {
 	
   bool dual_time = ((config->GetUnsteady_Simulation() == DT_STEPPING_1ST) ||
                     (config->GetUnsteady_Simulation() == DT_STEPPING_2ND));

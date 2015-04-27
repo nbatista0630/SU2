@@ -2,9 +2,9 @@
  * \file numerics_direct_heat.cpp
  * \brief This file contains all the convective term discretization.
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.

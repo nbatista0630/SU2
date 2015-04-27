@@ -1,10 +1,10 @@
 /*!
  * \file solution_direct_elasticity.cpp
  * \brief Main subrotuines for solving the linear elasticity equation.
- * \author F. Palacios, R. Sanchez
- * \version 3.2.8.2 "eagle"
+ * \author F. Palacios
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -40,10 +40,6 @@ CFEASolver::CFEASolver(CGeometry *geometry, CConfig *config) : CSolver() {
 	unsigned short iMarker, iDim, iElem, iForce;
 	unsigned long nMarker, nElem;
   double dull_val;
-
-  	SetFSI_ConvValue(0,0.0);
-  	SetFSI_ConvValue(1,0.0);
-
   
   int rank = MASTER_NODE;
 #ifdef HAVE_MPI
@@ -58,6 +54,12 @@ CFEASolver::CFEASolver(CGeometry *geometry, CConfig *config) : CSolver() {
 	node          = new CVariable*[nPoint];
 
 	element       = new CVariable*[nMarker];
+
+	WAitken_Dyn       = 0.0;
+	WAitken_Dyn_tn1   = 0.0;
+
+  	SetFSI_ConvValue(0,0.0);
+  	SetFSI_ConvValue(1,0.0);
 
 	nVar = nDim;
   
@@ -345,7 +347,8 @@ CFEASolver::~CFEASolver(void) {
 
 void CFEASolver::Preprocessing(CGeometry *geometry, CSolver **solver_container, CConfig *config, CNumerics **numerics, unsigned short iMesh, unsigned long Iteration, unsigned short RunTime_EqSystem, bool Output) {
 	unsigned long iPoint;
-  
+
+
   GetSurface_Pressure(geometry, config);
   
   unsigned long ExtIter = config->GetExtIter();
@@ -488,7 +491,7 @@ void CFEASolver::Compute_StiffMatrix(CGeometry *geometry, CSolver **solver_conta
     if (geometry->elem[iElem]->GetVTK_Type() == RECTANGLE)    nNodes = 4;
     if (geometry->elem[iElem]->GetVTK_Type() == TETRAHEDRON)  nNodes = 4;
     if (geometry->elem[iElem]->GetVTK_Type() == PYRAMID)      nNodes = 5;
-    if (geometry->elem[iElem]->GetVTK_Type() == WEDGE)        nNodes = 6;
+    if (geometry->elem[iElem]->GetVTK_Type() == PRISM)        nNodes = 6;
     if (geometry->elem[iElem]->GetVTK_Type() == HEXAHEDRON)   nNodes = 8;
 
 	/*--- For the number of nodes, we get the coordinates from the connectivity matrix ---*/
@@ -547,7 +550,7 @@ void CFEASolver::Compute_StiffMassMatrix(CGeometry *geometry, CSolver **solver_c
     if (geometry->elem[iElem]->GetVTK_Type() == RECTANGLE)    nNodes = 4;
     if (geometry->elem[iElem]->GetVTK_Type() == TETRAHEDRON)  nNodes = 4;
     if (geometry->elem[iElem]->GetVTK_Type() == PYRAMID)      nNodes = 5;
-    if (geometry->elem[iElem]->GetVTK_Type() == WEDGE)        nNodes = 6;
+    if (geometry->elem[iElem]->GetVTK_Type() == PRISM)        nNodes = 6;
     if (geometry->elem[iElem]->GetVTK_Type() == HEXAHEDRON)   nNodes = 8;
 
 	/*--- For the number of nodes, we get the coordinates from the connectivity matrix ---*/
@@ -560,6 +563,14 @@ void CFEASolver::Compute_StiffMassMatrix(CGeometry *geometry, CSolver **solver_c
     }
 
     /*--- We set the element stiffness matrix ---*/
+
+    /*--- This solves the problem but... why? ---*/
+	for (iVar = 0; iVar < nNodes*nDim; iVar++) {
+		StiffMatrix_Elem[iVar] = new double [nNodes*nDim];
+		for (jVar = 0; jVar < nNodes*nDim; jVar++) {
+    		StiffMatrix_Elem[iVar][jVar] = 0.0;
+    	}
+	}
 
     if (nDim == 2) numerics->SetFEA_StiffMassMatrix2D(StiffMatrix_Elem, MassMatrix_Elem, CoordCorners, nNodes, form2d);
     if (nDim == 3) numerics->SetFEA_StiffMassMatrix3D(StiffMatrix_Elem, MassMatrix_Elem, CoordCorners, nNodes);
@@ -1286,7 +1297,7 @@ void CFEASolver::Postprocessing(CGeometry *geometry, CSolver **solver_container,
 		if (geometry->elem[iElem]->GetVTK_Type() == RECTANGLE){    nNodes = 4;}
 		if (geometry->elem[iElem]->GetVTK_Type() == TETRAHEDRON){  nNodes = 4;}
 		if (geometry->elem[iElem]->GetVTK_Type() == PYRAMID){      nNodes = 5;}
-		if (geometry->elem[iElem]->GetVTK_Type() == WEDGE){        nNodes = 6;}
+		if (geometry->elem[iElem]->GetVTK_Type() == PRISM){        nNodes = 6;}
 		if (geometry->elem[iElem]->GetVTK_Type() == HEXAHEDRON){   nNodes = 8;}
 
 		/*--- For the number of nodes, we get the coordinates from the connectivity matrix ---*/
@@ -1598,11 +1609,11 @@ void CFEASolver::ImplicitNewmark_Iteration(CGeometry *geometry, CSolver **solver
 
 			}
 
-			double *check;
-			for (iPoint = geometry->GetnPointDomain(); iPoint < geometry->GetnPoint(); iPoint++) {
-			check = LinSysRes.GetBlock(iPoint);	// This avoids the problem in the corner, but...
-			cout << check[0] << "\t" << check[1] << endl;
-			}
+//			double *check;
+//			for (iPoint = geometry->GetnPointDomain(); iPoint < geometry->GetnPoint(); iPoint++) {
+//			check = LinSysRes.GetBlock(iPoint);	// This avoids the problem in the corner, but...
+//			cout << check[0] << "\t" << check[1] << endl;
+//			}
 
 			/*--- Solve the linear dynamic system ---*/
 
@@ -1978,7 +1989,7 @@ void CFEASolver::SetFEA_Load(CSolver ***flow_solution, CGeometry **fea_geometry,
 		LinSysRes.SetBlock_Zero(iPoint);
 	}
 
-	strucRelaxFactFSI=fea_config->GetAitkenRelax();
+	strucRelaxFactFSI=fea_config->GetAitkenStatRelax();
 	if (strucRelaxFactFSI > 1.0 ){
 		cout << "Structural relaxation factor can't be over 1. Setting it to 1. " << endl;
 		strucRelaxFactFSI=1;
@@ -2217,11 +2228,13 @@ void CFEASolver::PredictStruct_Displacement(CGeometry **fea_geometry, CConfig *f
 	double Delta_t= fea_config->GetDelta_DynTime();
     unsigned long iPoint, iDim;
     unsigned long nPoint, nDim;
-    double *solDisp, *solVel, *valPred;
+    double *solDisp, *solVel, *solVel_tn, *valPred, *checkPred;
 
     solDisp=new double [iDim];
     solVel=new double [iDim];
+    solVel_tn=new double [iDim];
     valPred=new double [iDim];
+    checkPred=new double [iDim];
 
     nPoint = fea_geometry[MESH_0]->GetnPoint();
     nDim = fea_geometry[MESH_0]->GetnDim();
@@ -2232,16 +2245,29 @@ void CFEASolver::PredictStruct_Displacement(CGeometry **fea_geometry, CConfig *f
 
     		solDisp = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution();
     		solVel = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution_Vel();
+    		valPred = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution_Pred();
 
     		for (iDim=0; iDim<nDim; iDim++){
     			valPred[iDim] = solDisp[iDim] + Delta_t*solVel[iDim];
     		}
 
-			fea_solution[MESH_0][FEA_SOL]->node[iPoint]->SetSolution_Pred(valPred);
+//			fea_solution[MESH_0][FEA_SOL]->node[iPoint]->SetSolution_Pred(valPred);
+
+
     	}
     	else if (predOrder==2) {
-    		cout<< "Order 2 predictor not implemented yet. Solving with order 0." << endl;
-    		fea_solution[MESH_0][FEA_SOL]->node[iPoint]->SetSolution_Pred();
+
+    		solDisp = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution();
+    		solVel = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution_Vel();
+    		solVel_tn = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution_Vel_time_n();
+    		valPred = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution_Pred();
+
+    		for (iDim=0; iDim<nDim; iDim++){
+    			valPred[iDim] = solDisp[iDim] + 0.5*Delta_t*(3*solVel[iDim]-solVel_tn[iDim]);
+    		}
+
+//			fea_solution[MESH_0][FEA_SOL]->node[iPoint]->SetSolution_Pred(valPred);
+
     	}
     	else {
     		cout<< "Higher order predictor not implemented. Solving with order 0." << endl;
@@ -2251,36 +2277,168 @@ void CFEASolver::PredictStruct_Displacement(CGeometry **fea_geometry, CConfig *f
 
 }
 
-void CFEASolver::SetAitken_Relaxation(CGeometry **fea_geometry, CConfig *fea_config, CSolver ***fea_solution) {
+void CFEASolver::ComputeAitken_Coefficient(CGeometry **fea_geometry, CConfig *fea_config, CSolver ***fea_solution, unsigned long iFSIIter) {
 
-    unsigned short predOrder=fea_config->GetPredictorOrder();
-	double Delta_t= fea_config->GetDelta_DynTime();
     unsigned long iPoint, iDim;
     unsigned long nPoint, nDim;
-    double *dispPred, *dispCalc, *valSolution;
-    double WAitken;
-
-    dispPred=new double [iDim];
-    dispCalc=new double [iDim];
-    valSolution=new double [iDim];
+    double *dispPred, *dispCalc, *dispPred_Old, *dispCalc_Old;
+    double deltaU[3] = {0.0, 0.0, 0.0}, deltaU_p1[3] = {0.0, 0.0, 0.0};
+    double delta_deltaU[3] = {0.0, 0.0, 0.0};
+    double numAitk, denAitk, cocAitk, WAitken;
+	double CurrentTime=fea_config->GetCurrent_DynTime();
+	double Static_Time=fea_config->GetStatic_Time();
+	double WAitkDyn_tn1, WAitkDyn_Max, WAitkDyn;
 
     nPoint = fea_geometry[MESH_0]->GetnPoint();
     nDim = fea_geometry[MESH_0]->GetnDim();
 
-    WAitken=fea_config->GetAitkenRelax();
+    WAitken=fea_config->GetAitkenStatRelax();
 
-    for (iPoint=0; iPoint<nPoint; iPoint++){
+    dispPred	=new double [iDim];
+    dispPred_Old=new double [iDim];
+    dispCalc	=new double [iDim];
+    dispCalc_Old=new double [iDim];
 
-    	dispPred = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution_Pred();
-    	dispCalc = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution();
+	numAitk = 0.0;
+	denAitk = 0.0;
 
-    	for (iDim=0; iDim<nDim; iDim++){
-    		valSolution[iDim] = (1.0 - WAitken)*dispPred[iDim] + WAitken*dispCalc[iDim];
-    	}
+	ofstream historyFile_FSI;
+	historyFile_FSI.open ("historyFSI.csv", std::ios_base::app);
 
-		fea_solution[MESH_0][FEA_SOL]->node[iPoint]->SetSolution_Pred(valSolution);
+	/*--- Only when there is movement, and a dynamic coefficient is requested, it makes sense to compute the Aitken's coefficient ---*/
 
-    }
+	if (CurrentTime > Static_Time) {
+
+		if (iFSIIter == 0){
+
+			WAitkDyn_tn1 = GetWAitken_Dyn_tn1();
+			WAitkDyn_Max = fea_config->GetAitkenDynMaxInit();
+
+			WAitkDyn = min(WAitkDyn_tn1, WAitkDyn_Max);
+
+			/*--- Temporal fix, only for now ---*/
+			WAitkDyn = max(WAitkDyn, 0.1);
+
+			SetWAitken_Dyn(WAitkDyn);
+
+			historyFile_FSI << " " << endl ;
+			historyFile_FSI << setiosflags(ios::fixed) << setprecision(4) << CurrentTime << "," ;
+			historyFile_FSI << setiosflags(ios::fixed) << setprecision(1) << iFSIIter << "," ;
+			historyFile_FSI << setiosflags(ios::scientific) << setprecision(4) << WAitkDyn ;
+
+		}
+		else{
+
+			for (iPoint=0; iPoint<nPoint; iPoint++){
+
+				dispPred = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution_Pred();
+				dispPred_Old = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution_Pred_Old();
+				dispCalc = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution();
+				dispCalc_Old = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution_Old();
+
+				for (iDim=0; iDim < nDim; iDim++){
+
+					/*--- Compute the deltaU and deltaU_n+1 ---*/
+					deltaU[iDim] = dispCalc_Old[iDim] - dispPred_Old[iDim];
+					deltaU_p1[iDim] = dispCalc[iDim] - dispPred[iDim];
+
+					/*--- Compute the difference ---*/
+					delta_deltaU[iDim] = deltaU_p1[iDim] - deltaU[iDim];
+
+					/*--- Add numerator and denominator ---*/
+					numAitk += deltaU[iDim] * delta_deltaU[iDim];
+					denAitk += delta_deltaU[iDim] * delta_deltaU[iDim];
+
+				}
+
+			}
+
+				WAitkDyn = GetWAitken_Dyn();
+
+			if (denAitk > 1E-8){
+				WAitkDyn = - 1.0 * WAitkDyn * numAitk / denAitk ;
+			}
+
+				WAitkDyn = max(WAitkDyn, 0.1);
+				WAitkDyn = min(WAitkDyn, 1.0);
+
+				SetWAitken_Dyn(WAitkDyn);
+
+				historyFile_FSI << setiosflags(ios::fixed) << setprecision(4) << CurrentTime << "," ;
+				historyFile_FSI << setiosflags(ios::fixed) << setprecision(1) << iFSIIter << "," ;
+				historyFile_FSI << setiosflags(ios::scientific) << setprecision(4) << WAitkDyn << "," ;
+
+		}
+
+	}
+
+	historyFile_FSI.close();
+
+
+}
+
+void CFEASolver::SetAitken_Relaxation(CGeometry **fea_geometry, CConfig *fea_config, CSolver ***fea_solution) {
+
+	double Delta_t= fea_config->GetDelta_DynTime();
+    unsigned long iPoint, iDim;
+    unsigned long nPoint, nDim;
+    unsigned short RelaxMethod_FSI;
+    double *dispPred, *dispCalc;
+    double WAitken;
+	double CurrentTime=fea_config->GetCurrent_DynTime();
+	double Static_Time=fea_config->GetStatic_Time();
+
+    dispPred=new double [iDim];
+    dispCalc=new double [iDim];
+
+    nPoint = fea_geometry[MESH_0]->GetnPoint();
+    nDim = fea_geometry[MESH_0]->GetnDim();
+
+    RelaxMethod_FSI = fea_config->GetRelaxation_Method_FSI();
+
+	/*--- Only when there is movement it makes sense to update the solutions... ---*/
+
+	if (CurrentTime > Static_Time) {
+
+		if (RelaxMethod_FSI == NO_RELAXATION){
+			WAitken = 1.0;
+		}
+		else if (RelaxMethod_FSI == FIXED_PARAMETER){
+			WAitken = fea_config->GetAitkenStatRelax();
+		}
+		else if (RelaxMethod_FSI == AITKEN_DYNAMIC){
+			WAitken = GetWAitken_Dyn();
+		}
+		else {
+			WAitken = 1.0;
+			cout << "No relaxation parameter used. " << endl;
+		}
+
+
+		for (iPoint=0; iPoint<nPoint; iPoint++){
+
+			/*--- Retrieve pointers to the predicted and calculated solutions ---*/
+			dispPred = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution_Pred();
+			dispCalc = fea_solution[MESH_0][FEA_SOL]->node[iPoint]->GetSolution();
+
+			/*--- Set predicted solution as the old predicted solution ---*/
+			fea_solution[MESH_0][FEA_SOL]->node[iPoint]->SetSolution_Pred_Old();
+
+			/*--- Set calculated solution as the old solution (needed for dynamic Aitken relaxation) ---*/
+			fea_solution[MESH_0][FEA_SOL]->node[iPoint]->SetSolution_Old(dispCalc);
+
+			/*--- Apply the Aitken relaxation ---*/
+			for (iDim=0; iDim < nDim; iDim++){
+				dispPred[iDim] = (1.0 - WAitken)*dispPred[iDim] + WAitken*dispCalc[iDim];
+			}
+
+			/*--- Set obtained solution as the new predicted solution ---*/
+			/*--- As dispPred is the pointer to the solution_Pred, we don't need to do this... ---*/
+			//fea_solution[MESH_0][FEA_SOL]->node[iPoint]->SetSolution_Pred(dispPred);
+
+		}
+
+	}
 
 }
 

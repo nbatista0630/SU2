@@ -2,9 +2,9 @@
  * \file dual_grid_structure.cpp
  * \brief Main classes for defining the dual grid
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -329,7 +329,7 @@ void CPoint::SetBoundary(unsigned short val_nmarker) {
 	Boundary = true;
 }
 
-CEdge::CEdge(unsigned long val_iPoint, unsigned long val_jPoint,unsigned short val_nDim) : CDualGrid(val_nDim) {
+CEdge::CEdge(unsigned long val_iPoint, unsigned long val_jPoint, unsigned short val_nDim) : CDualGrid(val_nDim) {
 	unsigned short iDim;
 	
   /*--- Pointers initialization ---*/

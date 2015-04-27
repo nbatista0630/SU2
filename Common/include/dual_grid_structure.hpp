@@ -3,9 +3,9 @@
  * \brief Headers of the main subroutines for doing the complete dual grid structure.
  *        The subroutines and functions are in the <i>dual_grid_structure.cpp</i> file.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -49,7 +49,7 @@ using namespace std;
  * \brief Class for controlling the dual volume definition. The dual volume is compose by 
  *        three main elements: points, edges, and vertices.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CDualGrid{
 protected:
@@ -86,7 +86,7 @@ public:
 	 * \param[in] val_coord_Elem_CG - Coordinates of the centre of gravity of the element.
    * \param[in] config - Definition of the particular problem.
 	 */
-	virtual void SetNodes_Coord(double *val_coord_Edge_CG, double *val_coord_FaceElem_CG,double *val_coord_Elem_CG) = 0;
+	virtual void SetNodes_Coord(double *val_coord_Edge_CG, double *val_coord_FaceElem_CG, double *val_coord_Elem_CG) = 0;
 	
 	/*! 
 	 * \overload
@@ -134,7 +134,7 @@ public:
  * \class CPoint
  * \brief Class for point definition (including control volume definition).
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CPoint : public CDualGrid {
 private:
@@ -729,7 +729,7 @@ public:
  * \class CEdge
  * \brief Class for defining an edge.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CEdge : public CDualGrid {
 private:
@@ -866,7 +866,7 @@ public:
  * \class CVertex
  * \brief Class for vertex definition (equivalent to edges, but for the boundaries).
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CVertex : public CDualGrid {
 private:
@@ -1020,12 +1020,6 @@ public:
 	 * \return Value of the rotation that must be applied to the solution of the vertex
 	 */
 	short GetRotation_Type(void);
-	
-	/*! 
-	 * \brief Set the periodic point of a vertex.
-	 * \param[in] val_periodicpoint - Value of periodic point of the vertex.
-	 */
-	void SetDonorPoint(long val_periodicpoint);
   
 	/*! 
 	 * \overload

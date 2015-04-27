@@ -2,9 +2,9 @@
  * \file solver_structure.inl
  * \brief In-Line subroutines of the <i>solver_structure.hpp</i> file.
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -75,6 +75,8 @@ inline void CSolver::SetFlow_Displacement(CGeometry **flow_geometry, CVolumetric
 inline void CSolver::SetStruct_Displacement(CGeometry **fea_geometry, CConfig *fea_config, CSolver ***fea_solution) { }
 
 inline void CSolver::PredictStruct_Displacement(CGeometry **fea_geometry, CConfig *fea_config, CSolver ***fea_solution) { }
+
+inline void CSolver::ComputeAitken_Coefficient(CGeometry **fea_geometry, CConfig *fea_config, CSolver ***fea_solution, unsigned long iFSIIter) { }
 
 inline void CSolver::SetAitken_Relaxation(CGeometry **fea_geometry, CConfig *fea_config, CSolver ***fea_solution) { }
 
@@ -278,6 +280,14 @@ inline void CSolver::SetTotal_HeatFluxDiff(double val_heat) { }
 
 inline void CSolver::SetTotal_CFEA(double val_cfea) { }
 
+inline double CSolver::GetWAitken_Dyn(void) { return 0; }
+
+inline double CSolver::GetWAitken_Dyn_tn1(void) { return 0; }
+
+inline void CSolver::SetWAitken_Dyn(double waitk) {  }
+
+inline void CSolver::SetWAitken_Dyn_tn1(double waitk_tn1) {  }
+
 inline void CSolver::SetTotal_CFreeSurface(double val_freesurface) { }
 
 inline void CSolver::SetTotal_CNearFieldOF(double val_cnearfieldpress) { }
@@ -444,10 +454,10 @@ inline void CSolver::BC_Dirichlet(CGeometry *geometry, CSolver **solver_containe
 								  unsigned short val_marker) { }
 
 inline void CSolver::BC_Interface_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, 
-									CConfig *config, unsigned short val_marker) { }
+									CConfig *config) { }
                   
 inline void CSolver::BC_NearField_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, 
-									CConfig *config, unsigned short val_marker) { }
+									CConfig *config) { }
 
 inline void CSolver::BC_ActDisk_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics,
                                                CConfig *config) { }
@@ -889,6 +899,14 @@ inline double CLinEulerSolver::GetTotal_CDeltaDrag() { return Total_CDeltaDrag; 
 inline double CFEASolver::GetTotal_CFEA() { return Total_CFEA; }
 
 inline void CFEASolver::SetTotal_CFEA(double cfea) { Total_CFEA = cfea; }
+
+inline double CFEASolver::GetWAitken_Dyn(void) { return WAitken_Dyn; }
+
+inline double CFEASolver::GetWAitken_Dyn_tn1(void) { return WAitken_Dyn_tn1; }
+
+inline void CFEASolver::SetWAitken_Dyn(double waitk) { WAitken_Dyn = waitk; }
+
+inline void CFEASolver::SetWAitken_Dyn_tn1(double waitk_tn1) { WAitken_Dyn_tn1 = waitk_tn1; }
 
 inline void CFEASolver::SetFSI_ConvValue(unsigned short val_index, double val_criteria) { FSI_Conv[val_index] = val_criteria; }
 

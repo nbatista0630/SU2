@@ -2,9 +2,9 @@
  * \file variable_direct_elasticity.cpp
  * \brief Definition of the solution fields.
  * \author F. Palacios, R. Sanchez
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -52,6 +52,7 @@ CFEAVariable::CFEAVariable(double *val_fea, unsigned short val_nDim, unsigned sh
 
 		/*--- Allocate solution structures ---*/
 		Solution_Pred =  new double [nVar];
+		Solution_Pred_Old =  new double [nVar];
 		Solution_time_n = new double [nVar];
 		Solution_Vel = new double [nVar];
 		Solution_Vel_time_n = new double [nVar];
@@ -61,6 +62,7 @@ CFEAVariable::CFEAVariable(double *val_fea, unsigned short val_nDim, unsigned sh
 		/*--- Initialization of variables for dynamic problem ---*/
 		for (iVar = 0; iVar < nVar; iVar++) {
 			Solution_Pred[iVar] =  val_fea[iVar];
+			Solution_Pred_Old[iVar] =  val_fea[iVar];
 			Solution_time_n[iVar] = val_fea[iVar];
 			Solution_Vel[iVar] = val_fea[iVar];
 			Solution_Vel_time_n[iVar] = val_fea[iVar];
@@ -158,6 +160,12 @@ void CFEAVariable::SetSolution_Pred(void){
 
 }
 
+void CFEAVariable::SetSolution_Pred_Old(void){
+
+	for (unsigned short iVar = 0; iVar < nVar; iVar++)
+		Solution_Pred_Old[iVar] = Solution_Pred[iVar];
+
+}
 
 
 CFEABoundVariable::CFEABoundVariable(void) : CVariable() { }

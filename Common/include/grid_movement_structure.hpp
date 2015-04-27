@@ -5,9 +5,9 @@
  *        technique definition). The subroutines and functions are in 
  *        the <i>grid_movement_structure.cpp</i> file.
  * \author F. Palacios, T. Economon, S. Padron
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -56,7 +56,7 @@ using namespace std;
  * \brief Class for moving the surface and volumetric 
  *        numerical grid (2D and 3D problems).
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CGridMovement {
 public:
@@ -85,7 +85,7 @@ public:
  * \class CFreeFormDefBox
  * \brief Class for defining the free form FFDBox structure.
  * \author F. Palacios & A. Galdran.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CFreeFormDefBox : public CGridMovement {
 public:
@@ -120,7 +120,10 @@ public:
 	unsigned long nSurfacePoint;				/*!< \brief Number of surfaces in the FFD FFDBox. */
 	vector<string> ParentFFDBox;					/*!< \brief Vector with all the parent FFD FFDBox. */
 	vector<string> ChildFFDBox;					/*!< \brief Vector with all the child FFD FFDBox. */
-	
+  vector<unsigned short> Fix_IPlane;  /*!< \brief Fix FFD I plane. */
+  vector<unsigned short> Fix_JPlane;  /*!< \brief Fix FFD J plane. */
+  vector<unsigned short> Fix_KPlane;  /*!< \brief Fix FFD K plane. */
+
 public:
 	
 	/*! 
@@ -141,6 +144,60 @@ public:
 	 */
 	~CFreeFormDefBox(void);
 	
+  /*!
+   * \brief Define the I planes to to fix in a FFD box.
+   * \param[in] val_plane - Index of the plane to fix.
+   */
+  void Set_Fix_IPlane(unsigned short val_plane);
+
+  /*!
+   * \brief Define the I planes to to fix in a FFD box.
+   * \param[in] val_plane - Index of the plane to fix.
+   */
+  void Set_Fix_JPlane(unsigned short val_plane);
+  
+  /*!
+   * \brief Define the I planes to to fix in a FFD box.
+   * \param[in] val_plane - Index of the plane to fix.
+   */
+  void Set_Fix_KPlane(unsigned short val_plane);
+  
+  /*!
+   * \brief Define the I planes to to fix in a FFD box.
+   * \param[in] val_plane - Index of the plane to fix.
+   */
+  unsigned short Get_Fix_IPlane(unsigned short val_index);
+  
+  /*!
+   * \brief Define the I planes to to fix in a FFD box.
+   * \param[in] val_plane - Index of the plane to fix.
+   */
+  unsigned short Get_Fix_JPlane(unsigned short val_index);
+  
+  /*!
+   * \brief Define the I planes to to fix in a FFD box.
+   * \param[in] val_plane - Index of the plane to fix.
+   */
+  unsigned short Get_Fix_KPlane(unsigned short val_index);
+  
+  /*!
+   * \brief Define the I planes to to fix in a FFD box.
+   * \param[in] val_plane - Index of the plane to fix.
+   */
+  unsigned short Get_nFix_IPlane(void);
+  
+  /*!
+   * \brief Define the I planes to to fix in a FFD box.
+   * \param[in] val_plane - Index of the plane to fix.
+   */
+  unsigned short Get_nFix_JPlane(void);
+  
+  /*!
+   * \brief Define the I planes to to fix in a FFD box.
+   * \param[in] val_plane - Index of the plane to fix.
+   */
+  unsigned short Get_nFix_KPlane(void);
+  
 	/*! 
 	 * \brief Add to the vector of markers a new marker.
 	 * \param[in] val_iMarker - New marker inside the FFD box.
@@ -354,7 +411,7 @@ public:
 	
 	/*! 
 	 * \brief Get the coordinates of the corner points.
-	 * \param[in] val_dim - Index of the coordinate (x,y,z).
+	 * \param[in] val_dim - Index of the coordinate (x, y, z).
 	 * \param[in] val_icornerpoints - Index of the corner point.
 	 * \return Coordinate <i>val_dim</i> of the corner point <i>val_icornerpoints</i>.
 	 */		
@@ -372,7 +429,7 @@ public:
 	 * \param[in] val_iindex - Value of the local i index of the control point.
 	 * \param[in] val_jindex - Value of the local j index of the control point.
 	 * \param[in] val_kindex - Value of the local k index of the control point.
-	 * \return Pointer to the coordinate vector of the control point with local index (i,j,k).
+	 * \return Pointer to the coordinate vector of the control point with local index (i, j, k).
 	 */		
 	double *GetCoordControlPoints(unsigned short val_iindex, unsigned short val_jindex, unsigned short val_kindex);
 	
@@ -381,7 +438,7 @@ public:
 	 * \param[in] val_iindex - Value of the local i index of the control point.
 	 * \param[in] val_jindex - Value of the local j index of the control point.
 	 * \param[in] val_kindex - Value of the local k index of the control point.
-	 * \return Pointer to the coordinate vector of the control point with local index (i,j,k).
+	 * \return Pointer to the coordinate vector of the control point with local index (i, j, k).
 	 */		
 	double *GetParCoordControlPoints(unsigned short val_iindex, unsigned short val_jindex, unsigned short val_kindex);
 	
@@ -398,7 +455,7 @@ public:
 
 	/*! 
 	 * \brief Set the new value of the coordinates of the control points.
-	 * \param[in] val_index - Local index (i,j,k) of the control point.
+	 * \param[in] val_index - Local index (i, j, k) of the control point.
 	 * \param[in] movement - Movement of the control point.
 	 */	
 	void SetControlPoints(unsigned short *val_index, double *movement);
@@ -458,7 +515,7 @@ public:
 	double *EvalCartesianCoord(double *ParamCoord);
 	
 	/*! 
-	 * \brief Set the Bernstein polynomial, defined as B_i^n(t) = Binomial(n,i)*t^i*(1-t)^(n-i).
+	 * \brief Set the Bernstein polynomial, defined as B_i^n(t) = Binomial(n, i)*t^i*(1-t)^(n-i).
 	 * \param[in] val_n - Degree of the Bernstein polynomial.
 	 * \param[in] val_i - Order of the Bernstein polynomial.
 	 * \param[in] val_t - Value of the parameter where the polynomial is evaluated.
@@ -529,8 +586,8 @@ public:
 	
 	/*! 
 	 * \brief The "order" derivative of the i-th Bernstein polynomial of degree n, evaluated at t, 
-	 *        is calculated as  (B_i^n(t))^{order}(t) = n*(GetBernstein(n-1,i-1,t)-GetBernstein(n-1,i,t)), 
-	 *        having in account that if i=0, GetBernstein(n-1,-1,t) = 0.
+	 *        is calculated as  (B_i^n(t))^{order}(t) = n*(GetBernstein(n-1, i-1, t)-GetBernstein(n-1, i, t)), 
+	 *        having in account that if i=0, GetBernstein(n-1,-1, t) = 0.
 	 * \param[in] val_n - Degree of the Bernstein polynomial.
 	 * \param[in] val_i - Order of the Bernstein polynomial.
 	 * \param[in] val_t - Value of the parameter where the polynomial is evaluated.
@@ -540,7 +597,7 @@ public:
 	double GetBernsteinDerivative(short val_n, short val_i, double val_t, short val_order);
   
 	/*! 
-	 * \brief The routine computes the gradient of F(u,v,w)=||X(u,v,w)-(x,y,z)||^2  evaluated at (u,v,w).
+	 * \brief The routine computes the gradient of F(u, v, w) = ||X(u, v, w)-(x, y, z)||^2  evaluated at (u, v, w).
 	 * \param[in] val_coord - Parametric coordiates of the target point.
 	 * \param[in] xyz - Cartesians coordinates of the point.
    * \param[in] analytical - Compute the analytical gradient.
@@ -549,9 +606,9 @@ public:
 	double *GetFFDGradient(double *val_coord, double *xyz);
 	
 	/*!
-	 * \brief The routine that computes the Hessian of F(u,v,w)=||X(u,v,w)-(x,y,z)||^2 evaluated at (u,v,w)
-	 *        Input: (u,v,w), (x,y,z)
-	 *        Output: Hessian F (u,v,w).
+	 * \brief The routine that computes the Hessian of F(u, v, w) = ||X(u, v, w)-(x, y, z)||^2 evaluated at (u, v, w)
+	 *        Input: (u, v, w), (x, y, z)
+	 *        Output: Hessian F (u, v, w).
 	 * \param[in] uvw - Current value of the parametrics coordinates.
 	 * \param[in] xyz - Cartesians coordinates of the target point to compose the functional.
 	 * \param[in] val_Hessian - Value of the hessian.
@@ -559,11 +616,11 @@ public:
 	void GetFFDHessian(double *uvw, double *xyz, double **val_Hessian);
   
 	/*! 
-	 * \brief An auxiliary routine to help us compute the gradient of F(u,v,w)=||X(u,v,w)-(x,y,z)||^2 = 
+	 * \brief An auxiliary routine to help us compute the gradient of F(u, v, w) = ||X(u, v, w)-(x, y, z)||^2 =
 	 *        (Sum_ijk^lmn P1_ijk Bi Bj Bk -x)^2+(Sum_ijk^lmn P2_ijk Bi Bj Bk -y)^2+(Sum_ijk^lmn P3_ijk Bi Bj Bk -z)^2
-	 *        Input: val_t, val_diff (to identify the index of the Bernstein polynomail we differentiate), the i,j,k , l,m,n 
-	 *        E.G.: val_diff=2 => we differentiate w.r.t. w  (val_diff=0,1,or 2) Output: d [B_i^l*B_j^m *B_k^n] / d val_diff  
-	 *        (val_u,val_v,val_w).
+	 *        Input: val_t, val_diff (to identify the index of the Bernstein polynomail we differentiate), the i, j, k , l, m, n 
+	 *        E.G.: val_diff=2 => we differentiate w.r.t. w  (val_diff=0,1, or 2) Output: d [B_i^l*B_j^m *B_k^n] / d val_diff  
+	 *        (val_u, val_v, val_w).
 	 * \param[in] uvw - __________.
 	 * \param[in] val_diff - __________.
 	 * \param[in] ijk - __________.
@@ -573,10 +630,10 @@ public:
 	double GetDerivative1(double *uvw, unsigned short val_diff, unsigned short *ijk, unsigned short *lmn);
 	
 	/*! 
-	 * \brief An auxiliary routine to help us compute the gradient of F(u,v,w)=||X(u,v,w)-(x,y,z)||^2 =
+	 * \brief An auxiliary routine to help us compute the gradient of F(u, v, w) = ||X(u, v, w)-(x, y, z)||^2 =
 	 *        (Sum_ijk^lmn P1_ijk Bi Bj Bk -x)^2+(Sum_ijk^lmn P2_ijk Bi Bj Bk -y)^2+(Sum_ijk^lmn P3_ijk Bi Bj Bk -z)^2
-	 *        Input: (u,v,w), dim , xyz=(x,y,z), l,m,n E.G.: dim=2 => we use the third coordinate of the control points, 
-	 *        and the z-coordinate of xyz  (0<=dim<=2) Output: 2* ( (Sum_{i,j,k}^l,m,n P_{ijk}[dim] B_i^l[u] B_j^m[v] B_k^n[w]) - 
+	 *        Input: (u, v, w), dim , xyz=(x, y, z), l, m, n E.G.: dim=2 => we use the third coordinate of the control points, 
+	 *        and the z-coordinate of xyz  (0<=dim<=2) Output: 2* ( (Sum_{i, j, k}^l, m, n P_{ijk}[dim] B_i^l[u] B_j^m[v] B_k^n[w]) - 
 	 *        xyz[dim]).
 	 * \param[in] uvw - __________.
 	 * \param[in] dim - __________.
@@ -587,13 +644,13 @@ public:
 	double GetDerivative2(double *uvw, unsigned short dim, double *xyz, unsigned short *lmn);
 	
 	/*! 
-	 * \brief An auxiliary routine to help us compute the gradient of F(u,v,w)=||X(u,v,w)-(x,y,z)||^2 =
+	 * \brief An auxiliary routine to help us compute the gradient of F(u, v, w) = ||X(u, v, w)-(x, y, z)||^2 =
 	 *        (Sum_ijk^lmn P1_ijk Bi Bj Bk -x)^2+(Sum_ijk^lmn P2_ijk Bi Bj Bk -y)+(Sum_ijk^lmn P3_ijk Bi Bj Bk -z)
 	 * \param[in] uvw - Parametric coordiates of the point.
 	 * \param[in] dim - Value of the coordinate to be differentiate.
 	 * \param[in] diff_this - Diferentiation with respect this coordinate.
 	 * \param[in] lmn - Degree of the FFD box.
-	 * \return Sum_{i,j,k}^{l,m,n} [one of them with -1, 
+	 * \return Sum_{i, j, k}^{l, m, n} [one of them with -1, 
 	 *        depending on diff_this=0,1 or 2] P_{ijk}[dim] * (B_i^l[u] B_j^m[v] B_k^n[w])--one of them diffrentiated; 
 	 *        which? diff_thiss will tell us ; E.G.: dim=2, diff_this=1 => we use the third coordinate of the control 
 	 *        points, and derivate de v-Bersntein polynomial (use m-1 when summing!!).
@@ -602,12 +659,12 @@ public:
 						  unsigned short *lmn);
 	
 	/*! 
-	 * \brief An auxiliary routine to help us compute the Hessian of F(u,v,w)=||X(u,v,w)-(x,y,z)||^2 =
+	 * \brief An auxiliary routine to help us compute the Hessian of F(u, v, w) = ||X(u, v, w)-(x, y, z)||^2 =
 	 *        (Sum_ijk^lmn P1_ijk Bi Bj Bk -x)^2+(Sum_ijk^lmn P2_ijk Bi Bj Bk -y)+(Sum_ijk^lmn P3_ijk Bi Bj Bk -z) 
-	 *        Input: val_t, val_diff, val_diff2 (to identify the index of the Bernstein polynomials we differentiate), the i,j,k , l,m,n 
-	 *        E.G.: val_diff=1, val_diff2=2  =>  we differentiate w.r.t. v and w  (val_diff=0,1,or 2)
+	 *        Input: val_t, val_diff, val_diff2 (to identify the index of the Bernstein polynomials we differentiate), the i, j, k , l, m, n 
+	 *        E.G.: val_diff=1, val_diff2=2  =>  we differentiate w.r.t. v and w  (val_diff=0,1, or 2)
 	 *        E.G.: val_diff=0, val_diff2=0 => we differentiate w.r.t. u two times
-	 *        Output: [d [B_i^l*B_j^m *B_k^n]/d val_diff *d [B_i^l*B_j^m *B_k^n]/d val_diff2] (val_u,val_v,val_w) .
+	 *        Output: [d [B_i^l*B_j^m *B_k^n]/d val_diff *d [B_i^l*B_j^m *B_k^n]/d val_diff2] (val_u, val_v, val_w) .
 	 * \param[in] uvw - __________.
 	 * \param[in] val_diff - __________.
 	 * \param[in] val_diff2 - __________.
@@ -619,11 +676,11 @@ public:
 						   unsigned short *ijk, unsigned short *lmn);
 	
 	/*! 
-	 * \brief An auxiliary routine to help us compute the Hessian of F(u,v,w)=||X(u,v,w)-(x,y,z)||^2 =
+	 * \brief An auxiliary routine to help us compute the Hessian of F(u, v, w) = ||X(u, v, w)-(x, y, z)||^2 =
 	 *        (Sum_ijk^lmn P1_ijk Bi Bj Bk -x)^2+(Sum_ijk^lmn P2_ijk Bi Bj Bk -y)+(Sum_ijk^lmn P3_ijk Bi Bj Bk -z) 
-	 *        Input: (u,v,w), dim , diff_this, diff_this_also, xyz=(x,y,z), l,m,n
+	 *        Input: (u, v, w), dim , diff_this, diff_this_also, xyz=(x, y, z), l, m, n
 	 *        Output:
-	 *        Sum_{i,j,k}^{l,m,n} [two of them with -1, depending on diff_this,diff_this_also=0,1 or 2] 
+	 *        Sum_{i, j, k}^{l, m, n} [two of them with -1, depending on diff_this, diff_this_also=0,1 or 2] 
 	 *        P_{ijk}[dim] * (B_i^l[u] B_j^m[v] B_k^n[w])--one of them diffrentiated; which? diff_thiss will tell us ;
 	 *        E.G.: dim=2, diff_this=1 => we use the third coordinate of the control points, and derivate de v-Bersntein 
 	 *        polynomial (use m-1 when summing!!).
@@ -682,7 +739,7 @@ public:
  * \class CVolumetricMovement
  * \brief Class for moving the volumetric numerical grid.
  * \author F. Palacios, A. Bueno, T. Economon, S. Padron.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CVolumetricMovement : public CGridMovement {
 protected:
@@ -791,7 +848,7 @@ public:
 	 * \param[in] CoordCorners - Coordiantes of the corners.
    * \param[in] DShapeFunction - Shape function information
 	 */
-  double ShapeFunc_Wedge(double Xi, double Eta, double Zeta, double CoordCorners[8][3], double DShapeFunction[8][4]);
+  double ShapeFunc_Prism(double Xi, double Eta, double Zeta, double CoordCorners[8][3], double DShapeFunction[8][4]);
   
   /*!
 	 * \brief Shape functions and derivative of the shape functions
@@ -827,7 +884,7 @@ public:
 	 * \brief Compute the shape functions for hexahedron
 	 * \param[in] CoordCorners - coordinates of the cornes of the hexahedron.
 	 */
-  double GetWedge_Volume(double CoordCorners[8][3]);
+  double GetPrism_Volume(double CoordCorners[8][3]);
   
   /*!
 	 * \brief Compute the shape functions for hexahedron
@@ -949,7 +1006,7 @@ public:
  * \class CSurfaceMovement
  * \brief Class for moving the surface numerical grid.
  * \author F. Palacios, T. Economon.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CSurfaceMovement : public CGridMovement {
 protected:
@@ -1151,6 +1208,15 @@ public:
 	 */		
 	void UpdateParametricCoord(CGeometry *geometry, CConfig *config, CFreeFormDefBox *FFDBox, unsigned short iFFDBox);
 	
+  /*!
+   * \brief Check the intersections of the FFD with the surface
+   * \param[in] geometry - Geometrical definition of the problem.
+   * \param[in] config - Definition of the particular problem.
+   * \param[in] FFDBox - Array with all the free forms FFDBoxes of the computation.
+   * \param[in] iFFDBox - _____________________.
+   */
+  void CheckFFDIntersections(CGeometry *geometry, CConfig *config, CFreeFormDefBox *FFDBox, unsigned short iFFDBox);
+  
 	/*! 
 	 * \brief _____________________.
 	 * \param[in] geometry - _____________________.

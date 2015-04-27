@@ -2,9 +2,9 @@
  * \file solution_adjoint_levelset.cpp
  * \brief Main subrotuines for solving the level set problem.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -1014,7 +1014,7 @@ void CAdjLevelSetSolver::ImplicitEuler_Iteration(CGeometry *geometry, CSolver **
     
 		Delta = Vol / solver_container[FLOW_SOL]->node[iPoint]->GetDelta_Time();
         
-		Jacobian.AddVal2Diag(iPoint,Delta);
+		Jacobian.AddVal2Diag(iPoint, Delta);
         
 		/*--- Right hand side of the system (-Residual) and initial guess (x = 0) ---*/
     

@@ -3,9 +3,9 @@
  * \brief Headers of the main subroutines used by SU2_CFD.
  *        The subroutines and functions are in the <i>definition_structure.cpp</i> file.
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -224,7 +224,7 @@ void SetWind_GustField(CConfig *config_container, CGeometry **geometry_container
  * \param[in] vort_strength - Vector of vortex strengths.
  * \param[in] r_core - Vector of vortex core size.
  */
-void InitializeVortexDistribution(unsigned long &nVortex, vector<double>& x0,vector<double>& y0,vector<double>& vort_strength,vector<double>& r_core);
+void InitializeVortexDistribution(unsigned long &nVortex, vector<double>& x0, vector<double>& y0, vector<double>& vort_strength, vector<double>& r_core);
 
 /*!
  * \brief Updates the positions and grid velocities for dynamic meshes between physical time steps.

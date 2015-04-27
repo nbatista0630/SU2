@@ -2,9 +2,9 @@
  * \file variable_structure.inl
  * \brief In-Line subroutines of the <i>variable_structure.hpp</i> file.
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -570,6 +570,14 @@ inline double *CVariable::GetEddyViscSens(void) { return NULL; }
 	inline double CVariable::GetSolution_Pred(unsigned short val_var){ return 0.0; }
 	
 	inline double *CVariable::GetSolution_Pred(void){ return NULL; }	
+	
+	inline void CVariable::SetSolution_Pred_Old(double *val_solution_pred_Old){  }
+	
+	inline void CVariable::SetSolution_Pred_Old(void){ }
+	
+	inline double CVariable::GetSolution_Pred_Old(unsigned short val_var){ return 0.0; }
+	
+	inline double *CVariable::GetSolution_Pred_Old(void){ return NULL; }		
 
 inline double CEulerVariable::GetDensity(void) { return Solution[0]; }
 
@@ -897,6 +905,12 @@ inline double **CFEABoundVariable::GetTraction(void) { return Traction; }
 	inline double CFEAVariable::GetSolution_Pred(unsigned short val_var){ return Solution_Pred[val_var]; }
 	
 	inline double *CFEAVariable::GetSolution_Pred(void){ return Solution_Pred; }
+	
+	inline void CFEAVariable::SetSolution_Pred_Old(double *val_solution_pred_Old){ Solution_Pred_Old = val_solution_pred_Old;  }
+	
+	inline double CFEAVariable::GetSolution_Pred_Old(unsigned short val_var){ return Solution_Pred_Old[val_var]; }
+	
+	inline double *CFEAVariable::GetSolution_Pred_Old(void){ return Solution_Pred_Old; }	
 
 
 inline double* CWaveVariable::GetSolution_Direct() { return Solution_Direct;}

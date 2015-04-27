@@ -4,9 +4,9 @@
  *        each kind of governing equation (direct, adjoint and linearized).
  *        The subroutines and functions are in the <i>variable_structure.cpp</i> file.
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -50,7 +50,7 @@ using namespace std;
  * \class CVariable
  * \brief Main class for defining the variables.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CVariable {
 protected:
@@ -1955,6 +1955,30 @@ public:
 	 */
 	virtual double *GetSolution_Pred(void);
 
+	/*!
+	 * \brief  A virtual member. Set the value of the solution predictor.
+	 */
+	virtual void SetSolution_Pred_Old(void);
+
+	/*!
+	 * \brief  A virtual member. Set the value of the old solution.
+	 * \param[in] val_solution_old - Pointer to the residual vector.
+	 */
+	virtual void SetSolution_Pred_Old(double *val_solution_pred_Old);
+
+	/*!
+	 * \brief  A virtual member. Get the value of the solution predictor.
+	 * \param[in] val_var - Index of the variable.
+	 * \return Pointer to the old solution vector.
+	 */
+	virtual double GetSolution_Pred_Old(unsigned short val_var);
+
+	/*!
+	 * \brief  A virtual member. Get the solution at time n.
+	 * \return Pointer to the solution (at time n) vector.
+	 */
+	virtual double *GetSolution_Pred_Old(void);
+
 
 
   
@@ -1964,7 +1988,7 @@ public:
  * \class CBaselineVariable
  * \brief Main class for defining the variables of a baseline solution from a restart file (for output).
  * \author F. Palacios, T. Economon.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CBaselineVariable : public CVariable {
 public:
@@ -1994,7 +2018,7 @@ public:
  * \brief Main class for defining the variables of the potential solver.
  * \ingroup Potential_Flow_Equation
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CPotentialVariable : public CVariable {
 	double *Charge_Density;
@@ -2038,7 +2062,7 @@ public:
  * \brief Main class for defining the variables of the wave equation solver.
  * \ingroup Potential_Flow_Equation
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CWaveVariable : public CVariable {
 protected:
@@ -2084,7 +2108,7 @@ public:
  * \brief Main class for defining the variables of the Heat equation solver.
  * \ingroup Potential_Flow_Equation
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CHeatVariable : public CVariable {
 protected:
@@ -2130,7 +2154,7 @@ public:
  * \brief Main class for defining the variables of the FEA equation solver.
  * \ingroup Structural Finite Element Analysis Variables
  * \author F. Palacios, R. Sanchez.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CFEAVariable : public CVariable {
 protected:
@@ -2146,6 +2170,7 @@ double Flow_Pressure;					/*!< \brief Pressure of the fluid. */
   *Solution_Accel_time_n;				/*!< \brief Acceleration of the nodes at time n. */
 
   double *Solution_Pred;				/*!< \brief Predictor of the solution (for FSI applications) */
+  double *Solution_Pred_Old;		/*!< \brief Predictor of the solution (for FSI applications) in the iter k-1 */
 
 public:
 
@@ -2395,6 +2420,31 @@ public:
 	 */
 	double *GetSolution_Pred(void);
 
+	/*!
+	 * \brief Set the value of the solution predictor.
+	 */
+	void SetSolution_Pred_Old(void);
+
+	/*!
+	 * \brief Set the value of the old solution.
+	 * \param[in] val_solution_old - Pointer to the residual vector.
+	 */
+	void SetSolution_Pred_Old(double *val_solution_pred_Old);
+
+	/*!
+	 * \brief Get the value of the solution predictor.
+	 * \param[in] val_var - Index of the variable.
+	 * \return Pointer to the old solution vector.
+	 */
+	double GetSolution_Pred_Old(unsigned short val_var);
+
+	/*!
+	 * \brief Get the solution at time n.
+	 * \return Pointer to the solution (at time n) vector.
+	 */
+	double *GetSolution_Pred_Old(void);
+
+
 
 };
 
@@ -2460,7 +2510,7 @@ public:
  * \brief Main class for defining the variables of the Euler's solver.
  * \ingroup Euler_Equations
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CEulerVariable : public CVariable {
 protected:
@@ -2472,15 +2522,15 @@ protected:
 
 	/*--- Primitive variable definition ---*/
   
-	double *Primitive;	/*!< \brief Primitive variables (T,vx,vy,vz,P,rho,h,c) in compressible flows. */
-	double **Gradient_Primitive;	/*!< \brief Gradient of the primitive variables (T,vx,vy,vz,P,rho). */ 
-  double *Limiter_Primitive;    /*!< \brief Limiter of the primitive variables (T,vx,vy,vz,P,rho). */ 
+	double *Primitive;	/*!< \brief Primitive variables (T, vx, vy, vz, P, rho, h, c) in compressible flows. */
+	double **Gradient_Primitive;	/*!< \brief Gradient of the primitive variables (T, vx, vy, vz, P, rho). */ 
+  double *Limiter_Primitive;    /*!< \brief Limiter of the primitive variables (T, vx, vy, vz, P, rho). */ 
 
   /*--- Secondary variable definition ---*/
   
-	double *Secondary;	/*!< \brief Primitive variables (T,vx,vy,vz,P,rho,h,c) in compressible flows. */
-	double **Gradient_Secondary;	/*!< \brief Gradient of the primitive variables (T,vx,vy,vz,P,rho). */
-  double *Limiter_Secondary;    /*!< \brief Limiter of the primitive variables (T,vx,vy,vz,P,rho). */
+	double *Secondary;	/*!< \brief Primitive variables (T, vx, vy, vz, P, rho, h, c) in compressible flows. */
+	double **Gradient_Secondary;	/*!< \brief Gradient of the primitive variables (T, vx, vy, vz, P, rho). */
+  double *Limiter_Secondary;    /*!< \brief Limiter of the primitive variables (T, vx, vy, vz, P, rho). */
 
 public:
 
@@ -2947,7 +2997,7 @@ public:
  * \brief Main class for defining the variables of the Navier-Stokes' solver.
  * \ingroup Navier_Stokes_Equations
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CNSVariable : public CEulerVariable {
 private:
@@ -3188,7 +3238,7 @@ public:
  * \brief Main class for defining the variables of the turbulence model.
  * \ingroup Turbulence_Model
  * \author A. Bueno.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 
 class CTurbSAVariable : public CTurbVariable {
@@ -3235,7 +3285,7 @@ public:
  * \brief Main class for defining the variables of the turbulence model.
  * \ingroup Turbulence_Model
  * \author A. Bueno.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 
 class CTurbMLVariable : public CTurbVariable {
@@ -3281,7 +3331,7 @@ public:
  * \brief Main class for defining the variables of the turbulence model.
  * \ingroup Turbulence_Model
  * \author A. Bueno.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 
 class CTransLMVariable : public CTurbVariable {
@@ -3333,7 +3383,7 @@ public:
  * \brief Main class for defining the variables of the turbulence model.
  * \ingroup Turbulence_Model
  * \author A. Bueno.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 
 class CTurbSSTVariable : public CTurbVariable {
@@ -3395,7 +3445,7 @@ public:
  * \brief Main class for defining the variables of the adjoint potential solver.
  * \ingroup Potential_Flow_Equation
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CAdjPotentialVariable : public CVariable {
 private:
@@ -3430,7 +3480,7 @@ public:
  * \brief Main class for defining the variables of the adjoint Euler solver.
  * \ingroup Euler_Equations
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CAdjEulerVariable : public CVariable {
 protected:
@@ -3549,7 +3599,7 @@ public:
  * \brief Main class for defining the variables of the adjoint Navier-Stokes solver.
  * \ingroup Navier_Stokes_Equations
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CAdjNSVariable : public CAdjEulerVariable {	
 private:
@@ -3621,7 +3671,7 @@ public:
  * \brief Main class for defining the variables of the adjoint turbulence model.
  * \ingroup Turbulence_Model
  * \author A. Bueno.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CAdjTurbVariable : public CVariable {
 protected:
@@ -3671,7 +3721,7 @@ public:
  * \brief Main class for defining the variables of the linearized potential equation.
  * \ingroup Potential_Flow_Equation
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CLinPotentialVariable : public CVariable {
 public:	
@@ -3682,7 +3732,7 @@ public:
  * \brief Main class for defining the variables of the linearized Euler's equations.
  * \ingroup Euler_Equations
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CLinEulerVariable : public CVariable {
 private:
@@ -3759,7 +3809,7 @@ public:
  * \brief Main class for defining the variables of the linearized Navier-Stokes' equations.
  * \ingroup Navier_Stokes_Equations
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CLinNSVariable : public CLinEulerVariable {
 public:
@@ -3770,7 +3820,7 @@ public:
  * \brief Main class for defining the variables of the Level Set.
  * \ingroup LevelSet_Model
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CAdjLevelSetVariable : public CVariable {
 public:
@@ -3818,9 +3868,9 @@ protected:
 	double Precond_Beta;	/*!< \brief Low Mach number preconditioner value, Beta. */
   
 	/*--- Primitive variable definition ---*/
-	double *Primitive;	/*!< \brief Primitive variables (T,vx,vy,vz,P,rho,h,c) in compressible flows. */
-	double **Gradient_Primitive;	/*!< \brief Gradient of the primitive variables (T,vx,vy,vz,P,rho). */
-  double *Limiter_Primitive;    /*!< \brief Limiter of the primitive variables (T,vx,vy,vz,P,rho). */
+	double *Primitive;	/*!< \brief Primitive variables (T, vx, vy, vz, P, rho, h, c) in compressible flows. */
+	double **Gradient_Primitive;	/*!< \brief Gradient of the primitive variables (T, vx, vy, vz, P, rho). */
+  double *Limiter_Primitive;    /*!< \brief Limiter of the primitive variables (T, vx, vy, vz, P, rho). */
   double *dPdU;                 /*!< \brief Partial derivative of pressure w.r.t. conserved variables. */
   double *dTdU;  /*!< \brief Partial derivative of temperature w.r.t. conserved variables. */
   double *dTvedU; /*!< \brief Partial derivative of vib.-el. temperature w.r.t. conserved variables. */
@@ -4581,7 +4631,7 @@ public:
  * \brief Main class for defining the variables of the potential solver.
  * \ingroup Potential_Flow_Equation
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CTemplateVariable : public CVariable {
 public:

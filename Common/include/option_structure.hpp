@@ -2,13 +2,13 @@
  * \file option_structure.hpp
  * \brief Defines classes for referencing options for easy input in CConfig
  * \author J. Hicken, B. Tracey
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
  * Many of the classes in this file are templated, and therefore must
  * be declared and defined here; to keep all elements together, there
  * is no corresponding .cpp file at this time.
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -79,7 +79,7 @@ public:
 
 /*!
  * \brief utility function for converting strings to uppercase
- * \param[in,out] str - string we want to convert
+ * \param[in, out] str - string we want to convert
  */
 inline void StringToUpperCase(string & str) {
   std::transform(str.begin(), str.end(), str.begin(), ::toupper);
@@ -154,7 +154,7 @@ const unsigned int N_POINTS_QUADRILATERAL = 4; /*!< \brief General output & CGNS
 const unsigned int N_POINTS_TETRAHEDRON = 4;   /*!< \brief General output & CGNS defines. */
 const unsigned int N_POINTS_HEXAHEDRON = 8;    /*!< \brief General output & CGNS defines. */
 const unsigned int N_POINTS_PYRAMID = 5;       /*!< \brief General output & CGNS defines. */
-const unsigned int N_POINTS_WEDGE = 6;         /*!< \brief General output & CGNS defines. */
+const unsigned int N_POINTS_PRISM = 6;         /*!< \brief General output & CGNS defines. */
 
 /*!
  * \brief Boolean answers
@@ -266,6 +266,21 @@ static const map<string, ENUM_REGIME> Regime_Map = CCreateMap<string, ENUM_REGIM
 ("COMPRESSIBLE", COMPRESSIBLE)
 ("INCOMPRESSIBLE", INCOMPRESSIBLE)
 ("FREESURFACE", FREESURFACE);
+
+/*!
+ * \brief different non-dimensional modes
+ */
+enum ENUM_KIND_NONDIM {
+  DIMENSIONAL = 0,			    /*!< \brief Dimensional simulation. */
+  FREESTEAM_PRESS_EQ_ONE = 1, /*!< \brief Non-dimensional simulation. */
+  FREESTEAM_VEL_EQ_MACH = 2, /*!< \brief Non-dimensional simulation. */
+  FREESTEAM_VEL_EQ_ONE = 3 /*!< \brief Non-dimensional simulation. */
+};
+static const map<string, ENUM_KIND_NONDIM> NonDim_Map = CCreateMap<string, ENUM_KIND_NONDIM>
+("DIMENSIONAL", DIMENSIONAL)
+("FREESTEAM_PRESS_EQ_ONE", FREESTEAM_PRESS_EQ_ONE)
+("FREESTEAM_VEL_EQ_MACH", FREESTEAM_VEL_EQ_MACH)
+("FREESTEAM_VEL_EQ_ONE", FREESTEAM_VEL_EQ_ONE);
 
 /*!
  * \brief different system of measurements
@@ -443,7 +458,7 @@ static const map<string, ENUM_GASMODEL> GasModel_Map = CCreateMap<string, ENUM_G
 ("O2", O2)
 ("N2", N2)
 ("AIR-5", AIR5)
-("ARGON-SID",ARGON_SID)
+("ARGON-SID", ARGON_SID)
 ("ONESPECIES", ONESPECIES);
 
 /*!
@@ -722,6 +737,21 @@ static const map<string, ENUM_2DFORM> ElasForm_2D = CCreateMap<string, ENUM_2DFO
 
 
 /*!
+ * \brief different regime modes
+ */
+enum ENUM_AITKEN {
+  NO_RELAXATION = 0,			/*!< \brief No relaxation in the strongly coupled approach. */
+  FIXED_PARAMETER = 1,			/*!< \brief Relaxation with a fixed parameter. */
+  AITKEN_DYNAMIC = 2,			/*!< \brief Relaxation using Aitken's dynamic parameter. */
+};
+static const map<string, ENUM_AITKEN> AitkenForm_Map = CCreateMap<string, ENUM_AITKEN>
+("NONE", NO_RELAXATION)
+("FIXED_PARAMETER", FIXED_PARAMETER)
+("AITKEN_DYNAMIC", AITKEN_DYNAMIC);
+
+
+
+/*!
  * \brief types inlet boundary treatments
  */
 enum RIEMANN_TYPE {
@@ -762,7 +792,7 @@ enum GEO_TYPE {
   RECTANGLE = 9,		/*!< \brief VTK nomenclature for defining a rectangle element. */
   TETRAHEDRON = 10,     	/*!< \brief VTK nomenclature for defining a tetrahedron element. */
   HEXAHEDRON = 12,      	/*!< \brief VTK nomenclature for defining a hexahedron element. */
-  WEDGE = 13,     		/*!< \brief VTK nomenclature for defining a wedge element. */
+  PRISM = 13,     		/*!< \brief VTK nomenclature for defining a prism element. */
   PYRAMID = 14  		/*!< \brief VTK nomenclature for defining a pyramid element. */
 };
 
@@ -830,7 +860,7 @@ static const map<string, ENUM_OBJECTIVE> Objective_Map = CCreateMap<string, ENUM
 ("MAX_THICK_SEC4", MAX_THICK_SEC4)
 ("MAX_THICK_SEC5", MAX_THICK_SEC5)
 ("AVG_TOTAL_PRESSURE", AVG_TOTAL_PRESSURE)
-("AVG_OUTLET_PRESSURE",AVG_OUTLET_PRESSURE)
+("AVG_OUTLET_PRESSURE", AVG_OUTLET_PRESSURE)
 ("MASS_FLOW_RATE", MASS_FLOW_RATE);
 
 /*!
@@ -916,13 +946,11 @@ static const map<string, ENUM_ADAPT> Adapt_Map = CCreateMap<string, ENUM_ADAPT>
  */
 enum ENUM_INPUT {
   SU2 = 1,                       /*!< \brief SU2 input format. */
-  CGNS = 2,                     /*!< \brief CGNS input format for the computational grid. */
-  NETCDF_ASCII = 3      	/*!< \brief ASCII NETCDF input format for the computational grid. */
+  CGNS = 2                     /*!< \brief CGNS input format for the computational grid. */
 };
 static const map<string, ENUM_INPUT> Input_Map = CCreateMap<string, ENUM_INPUT>
 ("SU2", SU2)
-("CGNS", CGNS)
-("NETCDF_ASCII", NETCDF_ASCII);
+("CGNS", CGNS);
 
 const int CGNS_STRING_SIZE = 33;/*!< \brief Length of strings used in the CGNS format. */
 
@@ -930,18 +958,20 @@ const int CGNS_STRING_SIZE = 33;/*!< \brief Length of strings used in the CGNS f
  * \brief type of solution output file formats
  */
 enum ENUM_OUTPUT {
-  TECPLOT = 1,  		/*!< \brief Tecplot format for the solution output. */
-  EXCEL = 2,			/*!< \brief Excel format for the solution output. */
-  CSV = 3,			/*!< \brief Comma-separated values format for the solution output. */
-  TECPLOT_BINARY = 4,  		/*!< \brief Tecplot binary format for the solution output. */
-  CGNS_SOL = 5,  		/*!< \brief CGNS format for the solution output. */
-  PARAVIEW = 6  		/*!< \brief Paraview format for the solution output. */
+  TECPLOT = 1,  		     /*!< \brief Tecplot format for the solution output. */
+  TECPLOT_BINARY = 2,    /*!< \brief Tecplot binary format for the solution output. */
+  FIELDVIEW = 3,  		   /*!< \brief FieldView format for the solution output. */
+  FIELDVIEW_BINARY = 4,  /*!< \brief FieldView binary format for the solution output. */
+  CSV = 5,			         /*!< \brief Comma-separated values format for the solution output. */
+  CGNS_SOL = 6,  	     	 /*!< \brief CGNS format for the solution output. */
+  PARAVIEW = 7  		     /*!< \brief Paraview format for the solution output. */
 };
 static const map<string, ENUM_OUTPUT> Output_Map = CCreateMap<string, ENUM_OUTPUT>
 ("TECPLOT", TECPLOT)
-("EXCEL", EXCEL)
-("CSV", CSV)
 ("TECPLOT_BINARY", TECPLOT_BINARY)
+("FIELDVIEW", FIELDVIEW)
+("FIELDVIEW_BINARY", FIELDVIEW_BINARY)
+("CSV", CSV)
 ("CGNS", CGNS_SOL)
 ("PARAVIEW", PARAVIEW);
 
@@ -1056,6 +1086,17 @@ static const map<string, ENUM_LINEAR_SOLVER> Linear_Solver_Map = CCreateMap<stri
 ("SMOOTHER_JACOBI", SMOOTHER_JACOBI)
 ("SMOOTHER_LINELET", SMOOTHER_LINELET)
 ("SMOOTHER_ILU0", SMOOTHER_ILU);
+
+/*!
+ * \brief types surface continuity at the intersection with the FFD
+ */
+enum ENUM_FFD_CONTINUITY {
+  DERIVATIVE_1ST = 1,		/*!< \brief First derivative continuity. */
+  DERIVATIVE_2ND = 2			/*!< \brief Second derivative continuity. */
+};
+static const map<string, ENUM_FFD_CONTINUITY> Continuity_Map = CCreateMap<string, ENUM_FFD_CONTINUITY>
+("1ST_DERIVATIVE", DERIVATIVE_1ST)
+("2ND_DERIVATIVE", DERIVATIVE_2ND);
 
 /*!
  * \brief types of sensitivity smoothing
@@ -1475,7 +1516,7 @@ public:
 
   ~COptionEnumList() {};
   string SetValue(vector<string> option_value) {
-    if (option_value.size() == 1 && option_value[0].compare("NONE")==0) {
+    if (option_value.size() == 1 && option_value[0].compare("NONE") == 0) {
       this->size = 0;
       return "";
     }
@@ -1567,7 +1608,7 @@ public:
   string SetValue(vector<string> option_value) {
     // The size is the length of option_value
     unsigned long option_size = option_value.size();
-    if (option_size == 1 && option_value[0].compare("NONE")==0) {
+    if (option_size == 1 && option_value[0].compare("NONE") == 0) {
       // No options
       this->size = 0;
       return "";
@@ -1609,7 +1650,7 @@ public:
   string SetValue(vector<string> option_value) {
     // The size is the length of option_value
     unsigned long option_size = option_value.size();
-    if (option_size == 1 && option_value[0].compare("NONE")==0) {
+    if (option_size == 1 && option_value[0].compare("NONE") == 0) {
       // No options
       this->size = 0;
       return "";
@@ -1650,7 +1691,7 @@ public:
   string SetValue(vector<string> option_value) {
     // The size is the length of option_value
     unsigned long option_size = option_value.size();
-    if (option_size == 1 && option_value[0].compare("NONE")==0) {
+    if (option_size == 1 && option_value[0].compare("NONE") == 0) {
       this->size = 0;
       return "";
     }
@@ -2663,15 +2704,16 @@ class COptionActuatorDisk : public COptionBase{
   double * & press_jump;
   double * & temp_jump;
   double * & omega;
+  unsigned short * & distribution;
 
 public:
-  COptionActuatorDisk(const string name, unsigned short & nMarker_ActDisk_Inlet, unsigned short & nMarker_ActDisk_Outlet, string * & Marker_ActDisk_Inlet, string * & Marker_ActDisk_Outlet, double ** & ActDisk_Origin, double * & ActDisk_RootRadius, double * & ActDisk_TipRadius, double * & ActDisk_PressJump, double * & ActDisk_TempJump, double * & ActDisk_Omega) : inlet_size(nMarker_ActDisk_Inlet),outlet_size(nMarker_ActDisk_Outlet), marker_inlet(Marker_ActDisk_Inlet), marker_outlet(Marker_ActDisk_Outlet), origin(ActDisk_Origin), root_radius(ActDisk_RootRadius), tip_radius(ActDisk_TipRadius), press_jump(ActDisk_PressJump), temp_jump(ActDisk_TempJump), omega(ActDisk_Omega) {
+  COptionActuatorDisk(const string name, unsigned short & nMarker_ActDisk_Inlet, unsigned short & nMarker_ActDisk_Outlet, string * & Marker_ActDisk_Inlet, string * & Marker_ActDisk_Outlet, double ** & ActDisk_Origin, double * & ActDisk_RootRadius, double * & ActDisk_TipRadius, double * & ActDisk_PressJump, double * & ActDisk_TempJump, double * & ActDisk_Omega, unsigned short * & ActDisk_Distribution) : inlet_size(nMarker_ActDisk_Inlet), outlet_size(nMarker_ActDisk_Outlet), marker_inlet(Marker_ActDisk_Inlet), marker_outlet(Marker_ActDisk_Outlet), origin(ActDisk_Origin), root_radius(ActDisk_RootRadius), tip_radius(ActDisk_TipRadius), press_jump(ActDisk_PressJump), temp_jump(ActDisk_TempJump), omega(ActDisk_Omega), distribution(ActDisk_Distribution) {
     this->name = name;
   }
 
   ~COptionActuatorDisk() {};
   string SetValue(vector<string> option_value) {
-    const int mod_num = 10;
+    const int mod_num = 11;
     unsigned long totalVals = option_value.size();
     if ((totalVals == 1) && (option_value[0].compare("NONE") == 0)) {
       this->SetDefault();
@@ -2696,6 +2738,7 @@ public:
     this->press_jump = new double[this->outlet_size];
     this->temp_jump = new double[this->outlet_size];
     this->omega = new double[this->inlet_size];
+    this->distribution = new unsigned short[this->inlet_size];
 
     this->origin = new double*[this->inlet_size];
     for (int i = 0; i < this->inlet_size; i++) {
@@ -2739,6 +2782,10 @@ public:
       if (!(ss_8th >> this->omega[i])) {
         return badValue(option_value, tname, this->name);
       }
+      istringstream ss_9th(option_value[mod_num*i + 10]);
+      if (!(ss_9th >> this->distribution[i])) {
+        return badValue(option_value, tname, this->name);
+      }
     }
     return "";
   }
@@ -2753,6 +2800,7 @@ public:
     this->press_jump = NULL;
     this->temp_jump = NULL;
     this->omega = NULL;
+    this->distribution = NULL;
   }
 };
 

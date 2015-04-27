@@ -2,9 +2,9 @@
  * \file numerics_direct_turbulent.cpp
  * \brief This file contains all the convective term discretization.
  * \author F. Palacios, A. Bueno
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -1041,7 +1041,7 @@ void CSourcePieceWise_TurbSST::ComputeResidual(double *val_residual, double **va
     pk = min(pk,20.0*beta_star*Density_i*TurbVar_i[1]*TurbVar_i[0]);
     pk = max(pk,0.0);
     
-    zeta = max(TurbVar_i[1],StrainMag_i*F2_i/a1);
+    zeta = max(TurbVar_i[1], StrainMag_i*F2_i/a1);
     pw = StrainMag_i*StrainMag_i - 2.0/3.0*zeta*diverg;
     pw = max(pw,0.0);
     
@@ -1400,7 +1400,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
   /* Call Spalart-Allmaras (for comparison) */
   SAInputs->Set(DUiDXj, DNuhatDXj, rotating_frame, transition, dist_i, Laminar_Viscosity_i, Density_i, TurbVar_i[0], intermittency);
   
-  SpalartAllmarasSourceTerm(SAInputs, SAConstants,SAResidual, SAJacobian, SAOtherOutputs);
+  SpalartAllmarasSourceTerm(SAInputs, SAConstants, SAResidual, SAJacobian, SAOtherOutputs);
   this->SANondimInputs -> Set(SAInputs);
 
   for (int i=0; i < nResidual; i++) {
@@ -1446,7 +1446,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
       Residual[i] = SAResidual[i];
       NondimResidual[i] = SANondimResidual[i];
     }
-  } else if (featureset.compare("nondim_production")==0) {
+  } else if (featureset.compare("nondim_production") == 0) {
     nInputMLVariables = 2;
     nOutputMLVariables = 1;
     netInput = new double[nInputMLVariables];
@@ -1525,7 +1525,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
       Residual[i] = NondimResidual[i];
     }
     SANondimInputs->DimensionalizeSource(nResidual, Residual);
-  } else if (featureset.compare("production")==0) {
+  } else if (featureset.compare("production") ==0) {
 //    cout <<"In production" << endl;
     nInputMLVariables = 3;
     nOutputMLVariables = 1;
@@ -1559,7 +1559,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
     }
     SANondimInputs->NondimensionalizeSource(nResidual, NondimResidual);
     
-  } else if (featureset.compare("nondim_destruction")==0) {
+  } else if (featureset.compare("nondim_destruction") ==0) {
     nInputMLVariables = 2;
     nOutputMLVariables = 1;
     
@@ -1580,7 +1580,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
       Residual[i] = NondimResidual[i];
     }
     SANondimInputs->DimensionalizeSource(nResidual, Residual);
-  } else if (featureset.compare("destruction")==0) {
+  } else if (featureset.compare("destruction") ==0) {
       nInputMLVariables = 3;
       nOutputMLVariables = 1;
       netInput = new double[nInputMLVariables];
@@ -1603,7 +1603,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
         NondimResidual[i] = Residual[i];
       }
       SANondimInputs->NondimensionalizeSource(nResidual, NondimResidual);
-  } else if (featureset.compare("nondim_crossproduction")==0) {
+  } else if (featureset.compare("nondim_crossproduction") ==0) {
     nInputMLVariables = 2;
     nOutputMLVariables = 1;
     netInput = new double[nInputMLVariables];
@@ -1627,7 +1627,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
       Residual[i] = NondimResidual[i];
     }
     SANondimInputs->DimensionalizeSource(nResidual, Residual);
-  } else if (featureset.compare("cross_production")==0) {
+  } else if (featureset.compare("cross_production") ==0) {
     nInputMLVariables = 3;
     nOutputMLVariables = 1;
     netInput = new double[nInputMLVariables];
@@ -1650,7 +1650,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
       NondimResidual[i] = Residual[i];
     }
     SANondimInputs->NondimensionalizeSource(nResidual, NondimResidual);
-  } else if (featureset.compare("nondim_source")==0) {
+  } else if (featureset.compare("nondim_source") ==0) {
     nInputMLVariables = 3;
     nOutputMLVariables = 1;
     netInput = new double[nInputMLVariables];
@@ -1672,7 +1672,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
       Residual[i] = NondimResidual[i];
     }
     SANondimInputs->DimensionalizeSource(nResidual, Residual);
-  } else if (featureset.compare("source")==0) {
+  } else if (featureset.compare("source") ==0) {
     nInputMLVariables =4;
     nOutputMLVariables = 1;
     netInput = new double[nInputMLVariables];
@@ -1697,7 +1697,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
       NondimResidual[i] = Residual[i];
     }
     SANondimInputs->NondimensionalizeSource(nResidual, NondimResidual);
-  } else if (featureset.compare("source_alt")==0) {
+  } else if (featureset.compare("source_alt") ==0) {
     nInputMLVariables =4;
     nOutputMLVariables = 1;
     netInput = new double[nInputMLVariables];
@@ -1754,7 +1754,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
     }
     SANondimInputs->NondimensionalizeSource(nResidual, NondimResidual);
     
-  } else if (featureset.compare("source_all")==0) {
+  } else if (featureset.compare("source_all") ==0) {
     nInputMLVariables = 8;
     nOutputMLVariables = 1;
     netInput = new double[nInputMLVariables];
@@ -1783,7 +1783,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
     }
     SANondimInputs->NondimensionalizeSource(nResidual, NondimResidual);
     
-  } else if (featureset.compare("fw_hifi")==0) {
+  } else if (featureset.compare("fw_hifi") ==0) {
     throw("doesn't work");
     nInputMLVariables = 2;
     nOutputMLVariables = 1;
@@ -1824,7 +1824,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
     }
     SANondimInputs->NondimensionalizeSource(nResidual, NondimResidual);
     
-  } else if (featureset.compare("fw_hifi_2")==0) {
+  } else if (featureset.compare("fw_hifi_2") ==0) {
     nInputMLVariables = 2;
     nOutputMLVariables = 1;
     netInput = new double[nInputMLVariables];
@@ -1902,7 +1902,7 @@ void CSourcePieceWise_TurbML::ComputeResidual(double *val_residual, double **val
       NondimResidual[i] = Residual[i];
     }
     SANondimInputs->NondimensionalizeSource(nResidual, NondimResidual);
-  } else if (featureset.compare("mul_production")==0) {
+  } else if (featureset.compare("mul_production") ==0) {
     nInputMLVariables = 2;
     nOutputMLVariables = 1;
     netInput = new double[nInputMLVariables];

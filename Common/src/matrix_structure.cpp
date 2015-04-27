@@ -2,9 +2,9 @@
  * \file matrix_structure.cpp
  * \brief Main subroutines for doing the sparse structures
  * \author F. Palacios, A. Bueno
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -647,7 +647,7 @@ void CSysMatrix::DiagonalProduct(CSysVector & vec, unsigned long row_i) {
   
   for (index = row_ptr[row_i]; index < row_ptr[row_i+1]; index++) {
     if (col_ind[index] == row_i) {
-      ProdBlockVector(row_i,col_ind[index],vec);
+      ProdBlockVector(row_i, col_ind[index], vec);
       for (iVar = 0; iVar < nVar; iVar++)
         prod_row_vector[iVar] += prod_block_vector[iVar];
     }

@@ -1,7 +1,7 @@
 # SU2 autoconf file
-# SU2 v3.2.8.2 "eagle"
+# SU2 v3.2.9 "eagle"
 #
-# SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+# SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
 #                      Dr. Thomas D. Economon (economon@stanford.edu).
 #
 # SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -37,7 +37,7 @@
 # ParMETIS integration added by Ben Kirk & Thomas D. Economon, 2/3/2015
 ##########################
 
-AC_INIT([SU2], [3.2.8.2], [su2code-dev@lists.stanford.edu],
+AC_INIT([SU2], [3.2.9], [su2code-dev@lists.stanford.edu],
         [SU2], [https://github.com/su2code])
 AC_PREREQ([2.59])
 AC_CONFIG_MACRO_DIR([m4])
@@ -364,13 +364,13 @@ AC_MSG_RESULT([
 
 -------------------------------------------------------------------------
 |    ___ _   _ ___                                                      |
-|   / __| | | |_  )   Release 3.2.8.2 'eagle'                           |
+|   / __| | | |_  )   Release 3.2.9 'eagle'                             |
 |   \\__ \\ |_| |/ /                                                      |
-|   |___/\\___//___|   Suite (Computational Fluid Dynamics Code)         |
+|   |___/\\___//___|   Suite                                             |
 |                                                                       |
 -------------------------------------------------------------------------
-| SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu). |
-|                      Dr. Thomas D. Economon (economon@stanford.edu).  |
+| SU2 Lead Dev.: Dr. Francisco Palacios (francisco.palacios@boeing.com).|
+|                Dr. Thomas D. Economon (economon@stanford.edu).        |
 -------------------------------------------------------------------------
 | SU2 Developers:                                                       |
 | - Prof. Juan J. Alonso's group at Stanford University.                |

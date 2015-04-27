@@ -3,9 +3,9 @@
  * \brief Headers of the main subroutines for creating the geometrical structure.
  *        The subroutines and functions are in the <i>geometry_structure.cpp</i> file.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -64,7 +64,7 @@ using namespace std;
  * \brief Parent class for defining the geometry of the problem (complete geometry, 
  *        multigrid agglomerated geometry, only boundary geometry, etc..)
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CGeometry {
 protected:
@@ -87,8 +87,8 @@ protected:
   Global_nelem_tetra,          /*!< \brief Total number of tetrahedra in the mesh across all processors. */
   nelem_hexa,           /*!< \brief Number of hexahedra in the mesh. */
   Global_nelem_hexa,           /*!< \brief Total number of hexahedra in the mesh across all processors. */
-  nelem_wedge,          /*!< \brief Number of wedges in the mesh. */
-  Global_nelem_wedge,          /*!< \brief Total number of wedges in the mesh across all processors. */
+  nelem_prism,          /*!< \brief Number of prisms in the mesh. */
+  Global_nelem_prism,          /*!< \brief Total number of prisms in the mesh across all processors. */
   nelem_pyramid,        /*!< \brief Number of pyramids in the mesh. */
   Global_nelem_pyramid,        /*!< \brief Total number of pyramids in the mesh across all processors. */
   nelem_edge_bound,           /*!< \brief Number of edges on the mesh boundaries. */
@@ -726,9 +726,9 @@ public:
   
   /*!
 	 * \brief A virtual member.
-	 * \returns Total number of wedge elements in a simulation across all processors.
+	 * \returns Total number of prism elements in a simulation across all processors.
 	 */
-	virtual unsigned long GetGlobal_nElemWedg();
+	virtual unsigned long GetGlobal_nElemPris();
   
   /*!
 	 * \brief A virtual member.
@@ -768,9 +768,9 @@ public:
   
   /*!
 	 * \brief A virtual member.
-	 * \return Number of wedge elements.
+	 * \return Number of prism elements.
 	 */
-	virtual unsigned long GetnElemWedg();
+	virtual unsigned long GetnElemPris();
   
   /*!
 	 * \brief A virtual member.
@@ -782,7 +782,7 @@ public:
 	 * \brief Indentify geometrical planes in the mesh
 	 */
 	virtual void SetGeometryPlanes(CConfig *config);
-
+  
 	/*!
 	 * \brief Get geometrical planes in the mesh
 	 */
@@ -836,9 +836,22 @@ public:
 	 * \param[in] Plane_Normal - Definition of the particular problem.
    * \param[in] Intersection - Definition of the particular problem.
    * \returns If the intersection has has been successful.
-	 */
-  unsigned short ComputeSegmentPlane_Intersection(double *Segment_P0, double *Segment_P1, double Variable_P0, double Variable_P1,
-                                                  double *Plane_P0, double *Plane_Normal, double *Intersection, double &Variable_Interp);
+   */
+  bool SegmentIntersectsPlane(double *Segment_P0, double *Segment_P1, double Variable_P0, double Variable_P1,
+                              double *Plane_P0, double *Plane_Normal, double *Intersection, double &Variable_Interp);
+  
+  /*!
+   * \brief Ray Intersects Triangle (Moller and Trumbore algorithm)
+   */
+  bool RayIntersectsTriangle(double orig[3], double dir[3],
+                             double vert0[3], double vert1[3], double vert2[3],
+                             double *intersect);
+  
+  /*!
+   * \brief Segment Intersects Triangle
+   */
+  bool SegmentIntersectsTriangle(double point0[3], double point1[3],
+                                 double vert0[3], double vert1[3], double vert2[3]);
 
 };
 
@@ -847,7 +860,7 @@ public:
  * \brief Class for reading a defining the primal grid which is read from the 
  *        grid file in .su2 format.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CPhysicalGeometry : public CGeometry {
 
@@ -947,17 +960,7 @@ public:
    */
   void Read_SU2_Format_Parallel(CConfig *config, string val_mesh_filename, unsigned short val_iZone, unsigned short val_nZone);
     
-  /*!
-   * \brief Reads the geometry of the grid and adjust the boundary
-   *        conditions with the configuration file in parallel (for parmetis).
-   * \param[in] config - Definition of the particular problem.
-   * \param[in] val_mesh_filename - Name of the file with the grid information.
-   * \param[in] val_format - Format of the file with the grid information.
-   * \param[in] val_iZone - Domain to be read from the grid file.
-   * \param[in] val_nZone - Total number of domains in the grid file.
-   */
-  void Generate_Adjacency_For_Partitioning(unsigned long element_count);
-  
+
   /*!
    * \brief Reads the geometry of the grid and adjust the boundary
    *        conditions with the configuration file in parallel (for parmetis).
@@ -1240,10 +1243,10 @@ public:
 	unsigned long GetGlobal_nElemHexa();
   
   /*!
-	 * \brief Retrieve total number of wedge elements in a simulation across all processors.
-	 * \returns Total number of wedge elements in a simulation across all processors.
+	 * \brief Retrieve total number of prism elements in a simulation across all processors.
+	 * \returns Total number of prism elements in a simulation across all processors.
 	 */
-	unsigned long GetGlobal_nElemWedg();
+	unsigned long GetGlobal_nElemPris();
   
   /*!
 	 * \brief Retrieve total number of pyramid elements in a simulation across all processors.
@@ -1282,10 +1285,10 @@ public:
 	unsigned long GetnElemHexa();
   
   /*!
-	 * \brief Get number of wedge elements.
-	 * \return Number of wedge elements.
+	 * \brief Get number of prism elements.
+	 * \return Number of prism elements.
 	 */
-	unsigned long GetnElemWedg();
+	unsigned long GetnElemPris();
   
   /*!
 	 * \brief Get number of pyramid elements.
@@ -1297,7 +1300,7 @@ public:
 	 * \brief Indentify geometrical planes in the mesh
 	 */
 	void SetGeometryPlanes(CConfig *config);
-
+  
 	/*!
 	 * \brief Get geometrical planes in the mesh
 	 */
@@ -1378,7 +1381,7 @@ public:
  * \brief Class for defining the multigrid geometry, the main delicated part is the 
  *        agglomeration stage, which is done in the declaration.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CMultiGridGeometry : public CGeometry {
 
@@ -1547,7 +1550,7 @@ public:
  * \class CPeriodicGeometry
  * \brief Class for defining a periodic boundary condition.
  * \author T. Economon, F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CPeriodicGeometry : public CGeometry {
 	CPrimalGrid*** newBoundPer;            /*!< \brief Boundary vector for new periodic elements (primal grid information). */
@@ -1593,7 +1596,7 @@ public:
  * \struct CMultiGridQueue
  * \brief Class for a multigrid queue system
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  * \date Aug 12, 2012
  */
 class CMultiGridQueue {

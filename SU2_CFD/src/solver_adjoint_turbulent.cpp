@@ -2,9 +2,9 @@
  * \file solution_adjoint_turbulent.cpp
  * \brief Main subrotuines for solving adjoint problems (Euler, Navier-Stokes, etc.).
  * \author F. Palacios, A. Bueno, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -160,7 +160,7 @@ CAdjTurbSolver::CAdjTurbSolver(CGeometry *geometry, CConfig *config, unsigned sh
     /*--- The first line is the header ---*/
     getline (restart_file, text_line);
     
-    while (getline (restart_file,text_line)) {
+    while (getline (restart_file, text_line)) {
 			istringstream point_line(text_line);
       
       /*--- Retrieve local index. If this node from the restart file lives
@@ -672,10 +672,10 @@ void CAdjTurbSolver::Upwind_Residual(CGeometry *geometry, CSolver **solver_conta
     /*--- Add and Subtract Residual ---*/
     LinSysRes.AddBlock(iPoint, Residual_i);
     LinSysRes.AddBlock(jPoint, Residual_j);
-    Jacobian.AddBlock(iPoint,iPoint,Jacobian_ii);
-    Jacobian.AddBlock(iPoint,jPoint,Jacobian_ij);
-    Jacobian.AddBlock(jPoint,iPoint,Jacobian_ji);
-    Jacobian.AddBlock(jPoint,jPoint,Jacobian_jj);
+    Jacobian.AddBlock(iPoint, iPoint, Jacobian_ii);
+    Jacobian.AddBlock(iPoint, jPoint, Jacobian_ij);
+    Jacobian.AddBlock(jPoint, iPoint, Jacobian_ji);
+    Jacobian.AddBlock(jPoint, jPoint, Jacobian_jj);
     
   }
   
@@ -801,8 +801,8 @@ void CAdjTurbSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 //    second_numerics->ComputeResidual(Residual, Jacobian_ii, Jacobian_jj, config);
 //    LinSysRes.AddBlock(iPoint, Residual);
 //    LinSysRes.SubtractBlock(jPoint, Residual);
-//    Jacobian.AddBlock(iPoint,iPoint, Jacobian_ii);
-//    Jacobian.AddBlock(iPoint,jPoint, Jacobian_jj);
+//    Jacobian.AddBlock(iPoint, iPoint, Jacobian_ii);
+//    Jacobian.AddBlock(iPoint, jPoint, Jacobian_jj);
 //    Jacobian.SubtractBlock(jPoint, iPoint, Jacobian_ii);
 //    Jacobian.SubtractBlock(jPoint, jPoint, Jacobian_jj);
 //    
@@ -835,7 +835,7 @@ void CAdjTurbSolver::ImplicitEuler_Iteration(CGeometry *geometry, CSolver **solv
     
 		Delta = Vol / (config->GetCFLRedCoeff_AdjTurb()*solver_container[FLOW_SOL]->node[iPoint]->GetDelta_Time());
     
-		Jacobian.AddVal2Diag(iPoint,Delta);
+		Jacobian.AddVal2Diag(iPoint, Delta);
     
     /*--- Right hand side of the system (-Residual) and initial guess (x = 0) ---*/
     

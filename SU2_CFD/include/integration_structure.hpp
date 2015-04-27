@@ -4,9 +4,9 @@
  *        The subroutines and functions are in the <i>integration_structure.cpp</i>, 
  *        <i>integration_time.cpp</i>, and <i>integration_notime.cpp</i> files.
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -51,7 +51,7 @@ using namespace std;
  * \brief Main class for doing the space integration, time integration, and monitoring 
  *        of a system of Partial Differential Equations (PDE).
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CIntegration {
 protected:
@@ -62,6 +62,7 @@ protected:
 	double Old_Func,	/*!< \brief Old value of the objective function (the function which is monitored). */
 	New_Func;			/*!< \brief Current value of the objective function (the function which is monitored). */
 	bool Convergence,		/*!< \brief To indicate if the flow solver (direct, adjoint, or linearized) has converged or not. */
+	Convergence_FSI,		/*!< \brief To indicate if the FSI problem has converged or not. */
 	Convergence_FullMG;		/*!< \brief To indicate if the Full Multigrid has converged and it is necessary to add a new level. */
 	double InitResidual;	/*!< \brief Initial value of the residual to evaluate the convergence level. */
 
@@ -130,8 +131,7 @@ public:
 	 * \param[in] Iteration - Current iteration.
 	 * \param[in] monitor - Objective function that is use to study its convergence.
 	 */
-	void Convergence_FSI(CGeometry *geometry, CConfig *config, CSolver *fea_solver,
-								unsigned long Iteration, double monitor);
+	void Convergence_Monitoring_FSI(CGeometry *fea_geometry, CConfig *fea_config, CSolver *fea_solver, unsigned long iFSIIter);
 
 
 	/*!
@@ -148,12 +148,28 @@ public:
 	bool GetConvergence(void);
 	
 	/*! 
+	 * \brief Get the indicator of the convergence for the Fluid-Structure Interaction problem.
+	 * \return <code>TRUE</code> means that the convergence criteria is satisfied;
+	 *         otherwise <code>FALSE</code>.
+	 */
+	bool GetConvergence_FSI(void);
+
+	/*!
 	 * \brief Set the indicator of the convergence.
 	 * \param[in] value - <code>TRUE</code> means that the convergence criteria is satisfied; 
 	 *            otherwise <code>FALSE</code>.
 	 */
 	void SetConvergence(bool value);
 	
+
+	/*!
+	 * \brief Set the indicator of the convergence for FSI.
+	 * \param[in] valueFSI - <code>TRUE</code> means that the convergence criteria for FSI is satisfied;
+	 *            otherwise <code>FALSE</code>.
+	 */
+	void SetConvergence_FSI(bool valueFSI);
+
+
 	/*! 
 	 * \brief Get the indicator of the convergence for the full multigrid problem.
 	 * \return <code>TRUE</code> means that the convergence criteria is satisfied; 
@@ -170,6 +186,14 @@ public:
 	void SetDualTime_Solver(CGeometry *geometry, CSolver *solver, CConfig *config, unsigned short iMesh);
 	
 	/*! 
+	 * \brief Save the structural solution at different time steps.
+	 * \param[in] geometry - Geometrical definition of the problem.
+	 * \param[in] solution - Structural solution.
+   * \param[in] config - Definition of the particular problem.
+	 */
+	void SetStructural_Solver(CGeometry *geometry, CSolver *solver, CConfig *config, unsigned short iMesh);
+
+	/*!
 	 * \brief A virtual member.
 	 * \param[in] geometry - Geometrical definition of the problem.
 	 * \param[in] solver_container - Container vector with all the solutions.
@@ -351,7 +375,7 @@ public:
  * \class CMultiGridIntegration
  * \brief Class for doing the numerical integration using a multigrid method.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CMultiGridIntegration : public CIntegration {
 protected:
@@ -523,7 +547,7 @@ public:
  * \class CSingleGridIntegration
  * \brief Class for doing the numerical integration of the turbulence model.
  * \author A. Bueno.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CSingleGridIntegration : public CIntegration {
 public:
@@ -584,7 +608,7 @@ public:
  * \class CStructuralIntegration
  * \brief Class for doing the numerical integration of the structural model.
  * \author R. Sanchez.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CStructuralIntegration : public CIntegration {
 public:

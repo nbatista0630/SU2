@@ -2,9 +2,9 @@
  * \file solution_adjoint_tne2.cpp
  * \brief Main subrotuines for solving adjoint problems (Euler, Navier-Stokes, etc.).
  * \author S. Copeland
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -2393,7 +2393,7 @@ void CAdjTNE2EulerSolver::BC_Far_Field(CGeometry *geometry,
     
       /*--- Pass conserved & primitive variables to CNumerics ---*/
 			conv_numerics->SetConservative(U_domain, U_infty);
-      conv_numerics->SetPrimitive(V_domain,V_infty);
+      conv_numerics->SetPrimitive(V_domain, V_infty);
       
       /*--- Pass supplementary information to CNumerics ---*/
       conv_numerics->SetdPdU(solver_container[TNE2_SOL]->node[iPoint]->GetdPdU(),

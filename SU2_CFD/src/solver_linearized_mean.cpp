@@ -2,9 +2,9 @@
  * \file solution_linearized_mean.cpp
  * \brief Main subrotuines for solving linearized problems (Euler, Navier-Stokes, etc.).
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -165,7 +165,7 @@ CLinEulerSolver::CLinEulerSolver(CGeometry *geometry, CConfig *config, unsigned 
     /*--- The first line is the header ---*/
     getline (restart_file, text_line);
     
-    while (getline (restart_file,text_line)) {
+    while (getline (restart_file, text_line)) {
 			istringstream point_line(text_line);
       
       /*--- Retrieve local index. If this node from the restart file lives 
@@ -261,7 +261,7 @@ void CLinEulerSolver::Centered_Residual(CGeometry *geometry, CSolver **solver_co
 
 		/*--- Undivided laplacian ---*/
 		if (second_order) 
-			numerics->SetUndivided_Laplacian(node[iPoint]->GetUndivided_Laplacian(),node[jPoint]->GetUndivided_Laplacian());
+			numerics->SetUndivided_Laplacian(node[iPoint]->GetUndivided_Laplacian(), node[jPoint]->GetUndivided_Laplacian());
 		
 		/*--- Compute residual ---*/
 		numerics->ComputeResidual(Res_Conv, Res_Visc, Jacobian_i, Jacobian_j, config);

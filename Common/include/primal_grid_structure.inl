@@ -2,9 +2,9 @@
  * \file primal_grid_structure.inl
  * \brief In-Line subroutines of the <i>primal_grid_structure.hpp</i> file.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -203,27 +203,27 @@ inline unsigned short CHexahedron::GetMaxNodesFace(void) { return maxNodesFace; 
 
 inline unsigned short CHexahedron::GetnNeighbor_Elements(void) { return nNeighbor_Elements; }
 
-inline unsigned short CWedge::GetFaces(unsigned short val_face, unsigned short val_index) { return Faces[val_face][val_index]; }
+inline unsigned short CPrism::GetFaces(unsigned short val_face, unsigned short val_index) { return Faces[val_face][val_index]; }
 
-inline unsigned short CWedge::GetNeighbor_Nodes(unsigned short val_node, unsigned short val_index) { return Neighbor_Nodes[val_node][val_index]; }
+inline unsigned short CPrism::GetNeighbor_Nodes(unsigned short val_node, unsigned short val_index) { return Neighbor_Nodes[val_node][val_index]; }
 
-inline unsigned short CWedge::GetnNodesFace(unsigned short val_face) { return nNodesFace[val_face]; }
+inline unsigned short CPrism::GetnNodesFace(unsigned short val_face) { return nNodesFace[val_face]; }
 
-inline unsigned short CWedge::GetnNeighbor_Nodes(unsigned short val_node) { return nNeighbor_Nodes[val_node]; }
+inline unsigned short CPrism::GetnNeighbor_Nodes(unsigned short val_node) { return nNeighbor_Nodes[val_node]; }
 
-inline unsigned long CWedge::GetNode(unsigned short val_node) { return Nodes[val_node]; }
+inline unsigned long CPrism::GetNode(unsigned short val_node) { return Nodes[val_node]; }
 
-inline void CWedge::SetNode(unsigned short val_node, unsigned long val_point) { Nodes[val_node] = val_point; }
+inline void CPrism::SetNode(unsigned short val_node, unsigned long val_point) { Nodes[val_node] = val_point; }
 
-inline unsigned short CWedge::GetnNodes(void) { return nNodes; }
+inline unsigned short CPrism::GetnNodes(void) { return nNodes; }
 
-inline unsigned short CWedge::GetnFaces(void) { return nFaces; }
+inline unsigned short CPrism::GetnFaces(void) { return nFaces; }
 
-inline unsigned short CWedge::GetVTK_Type(void) { return VTK_Type; }
+inline unsigned short CPrism::GetVTK_Type(void) { return VTK_Type; }
 
-inline unsigned short CWedge::GetMaxNodesFace(void) { return maxNodesFace; }
+inline unsigned short CPrism::GetMaxNodesFace(void) { return maxNodesFace; }
 
-inline unsigned short CWedge::GetnNeighbor_Elements(void) { return nNeighbor_Elements; }
+inline unsigned short CPrism::GetnNeighbor_Elements(void) { return nNeighbor_Elements; }
 
 inline unsigned short CPyramid::GetFaces(unsigned short val_face, unsigned short val_index) { return Faces[val_face][val_index]; }
 

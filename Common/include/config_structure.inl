@@ -2,9 +2,9 @@
  * \file config_structure.inl
  * \brief In-Line subroutines of the <i>config_structure.hpp</i> file.
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -52,6 +52,8 @@ inline unsigned short CConfig::GetnZone(void) { return nZone; }
 inline unsigned short CConfig::GetiZone(void) { return iZone; }
 
 inline unsigned short CConfig::GetKind_SU2(void) { return Kind_SU2; }
+
+inline unsigned short CConfig::GetRef_NonDim(void) { return Ref_NonDim; }
 
 inline void CConfig::SetKind_SU2(unsigned short val_kind_su2) { Kind_SU2 = val_kind_su2 ; }
 
@@ -334,6 +336,8 @@ inline void CConfig::SetPressure_Ref(double val_pressure_ref) { Pressure_Ref = v
 
 inline void CConfig::SetDensity_Ref(double val_density_ref) { Density_Ref = val_density_ref; }
 
+inline void CConfig::SetTemperature_Ref(double val_temperature_ref) { Temperature_Ref = val_temperature_ref; }
+
 inline void CConfig::SetTime_Ref(double val_time_ref) { Time_Ref = val_time_ref; }
 
 inline void CConfig::SetOmega_Ref(double val_omega_ref) { Omega_Ref = val_omega_ref; }
@@ -397,6 +401,8 @@ inline string CConfig::GetTagFFDBox(unsigned short val_ffd) {	return TagFFDBox[v
 inline unsigned short CConfig::GetnDV(void) {	return nDV; }
 
 inline unsigned short CConfig::GetnFFDBox(void) {	return nFFDBox; }
+
+inline unsigned short CConfig::GetFFD_Continuity(void) { return FFD_Continuity; }
 
 inline unsigned short CConfig::GetnRKStep(void) { return nRKStep; }
 
@@ -1161,6 +1167,8 @@ inline double CConfig::GetTarget_CL(void) {return Target_CL; }
 
 inline double CConfig::GetDamp_Fixed_CL(void) {return Damp_Fixed_CL; }
 
+inline unsigned long CConfig::GetIter_Fixed_CL(void) {return Iter_Fixed_CL; }
+
 inline bool CConfig::GetUpdate_AoA(void) { return Update_AoA; }
 
 inline void CConfig::SetUpdate_AoA(bool val_update) { Update_AoA = val_update; }
@@ -1177,7 +1185,9 @@ inline unsigned short CConfig::GetConsole_Output_Verb(void) { return Console_Out
 
 inline unsigned short CConfig::GetnIterFSI(void) { return nIterFSI; }
 
-inline double CConfig::GetAitkenRelax(void) { return AitkenRelax; }
+inline double CConfig::GetAitkenStatRelax(void) { return AitkenStatRelax; }
+
+inline double CConfig::GetAitkenDynMaxInit(void) { return AitkenDynMaxInit; }
 
 inline bool CConfig::GetDeadLoad(void) { return DeadLoad; }
 
@@ -1206,4 +1216,10 @@ inline double CConfig::GetStatic_Time(void) { return Static_Time; }
 inline unsigned short CConfig::GetPredictorOrder(void) { return Pred_Order; }
 
 inline bool CConfig::GetFSI_Simulation(void) { return FSI_Problem; }
+
+inline unsigned short CConfig::GetRelaxation_Method_FSI(void) { return Kind_BGS_RelaxMethod; }
+
+inline double CConfig::GetOrderMagResidualFSI(void) { return OrderMagResidualFSI; }
+
+inline double CConfig::GetMinLogResidualFSI(void) { return MinLogResidualFSI; }
 

@@ -2,9 +2,9 @@
  * \file integration_structure.inl
  * \brief In-Line subroutines of the <i>integration_structure.hpp</i> file.
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -35,9 +35,13 @@ inline double CIntegration::GetCauchy_Value(void) { return Cauchy_Value; }
 
 inline bool CIntegration::GetConvergence(void) { return Convergence; }
 
+inline bool CIntegration::GetConvergence_FSI(void) { return Convergence_FSI; }
+
 inline bool CIntegration::GetConvergence_FullMG(void) { return Convergence_FullMG; }
 
 inline void CIntegration::SetConvergence(bool value) { Convergence = value; }
+
+inline void CIntegration::SetConvergence_FSI(bool valueFSI) { Convergence_FSI = valueFSI; }
 
 inline void CIntegration::MultiGrid_Iteration(CGeometry ***geometry, CSolver ****solver_container, CNumerics *****numerics_container, 
 											  CConfig **config, unsigned short RunTime_EqSystem, unsigned long Iteration, unsigned short iZone) { }

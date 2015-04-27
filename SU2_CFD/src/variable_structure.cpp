@@ -2,9 +2,9 @@
  * \file variable_structure.cpp
  * \brief Definition of the solution fields.
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -213,7 +213,7 @@ void CVariable::AddConservativeSolution(unsigned short val_var, double val_solut
 		double val_density, double val_density_old, double lowerlimit, double upperlimit) {
   
 	Solution[val_var] = min(max((Solution_Old[val_var]*val_density_old + val_solution)/val_density,
-			lowerlimit),upperlimit);
+			lowerlimit), upperlimit);
   
 }
 

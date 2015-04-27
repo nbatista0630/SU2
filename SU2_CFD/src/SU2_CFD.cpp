@@ -2,9 +2,9 @@
  * \file SU2_CFD.cpp
  * \brief Main file of the Computational Fluid Dynamics code
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -36,8 +36,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
   
   bool StopCalc = false;
-  bool StopCalcFlow = false, StopCalcStruct = false;
-  double StartTime = 0.0, StopTime = 0.0, UsedTime = 0.0, UsedTimeCheck = 0.0;
+  double StartTime = 0.0, StopTime = 0.0, UsedTime = 0.0;
   unsigned long ExtIter = 0;
   unsigned short iMesh, iZone, iSol, nZone, nDim;
   char config_file_name[MAX_STRING_SIZE];
@@ -50,7 +49,7 @@ int main(int argc, char *argv[]) {
   
 #ifdef HAVE_MPI
   int *bptr, bl;
-  MPI_Init(&argc,&argv);
+  MPI_Init(&argc, &argv);
   MPI_Buffer_attach( malloc(BUFSIZE), BUFSIZE );
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -74,7 +73,7 @@ int main(int argc, char *argv[]) {
   /*--- Load in the number of zones and spatial dimensions in the mesh file (If no config
    file is specified, default.cfg is used) ---*/
   
-  if (argc == 2) { strcpy(config_file_name,argv[1]); }
+  if (argc == 2) { strcpy(config_file_name, argv[1]); }
   else { strcpy(config_file_name, "default.cfg"); }
   
   /*--- Read the name and format of the input mesh file to get from the mesh
@@ -306,13 +305,12 @@ int main(int argc, char *argv[]) {
   iFluidIt=0;
   nFluidIt=config_container[ZONE_0]->GetnIterFSI();
 
-
   while (ExtIter < config_container[ZONE_0]->GetnExtIter()) {
     
     /*--- Set the value of the external iteration. ---*/
     
     config_container[ZONE_0]->SetExtIter(ExtIter);
-
+    
     /*--- Read the target pressure ---*/
     
     if (config_container[ZONE_0]->GetInvDesign_Cp() == YES)
@@ -439,7 +437,7 @@ int main(int argc, char *argv[]) {
 	      case HEAT_EQUATION:
 	        StopCalc = integration_container[ZONE_0][HEAT_SOL]->GetConvergence(); break;
 	      case LINEAR_ELASTICITY:
-	    	// This is a temporal fix
+	    	// This is a temporal fix, as we don't have non-linear solver yet
 //	        StopCalc = integration_container[ZONE_0][FEA_SOL]->GetConvergence(); break;
 	    	StopCalc = false; break;
 	      case ADJ_EULER: case ADJ_NAVIER_STOKES: case ADJ_RANS:
@@ -453,13 +451,19 @@ int main(int argc, char *argv[]) {
      routines. ---*/
     
     if ((ExtIter+1 >= config_container[ZONE_0]->GetnExtIter()) ||
+        
         ((ExtIter % config_container[ZONE_0]->GetWrt_Sol_Freq() == 0) && (ExtIter != 0) &&
          !((config_container[ZONE_0]->GetUnsteady_Simulation() == DT_STEPPING_1ST) ||
            (config_container[ZONE_0]->GetUnsteady_Simulation() == DT_STEPPING_2ND))) ||
+        
         (StopCalc) ||
-        (((config_container[ZONE_0]->GetUnsteady_Simulation() == DT_STEPPING_1ST) ||
-          (config_container[ZONE_0]->GetUnsteady_Simulation() == DT_STEPPING_2ND)) &&
-         ((ExtIter == 0) || (ExtIter % config_container[ZONE_0]->GetWrt_Sol_Freq_DualTime() == 0)))) {
+        
+        ((config_container[ZONE_0]->GetUnsteady_Simulation() == DT_STEPPING_1ST) &&
+         ((ExtIter == 0) || (ExtIter % config_container[ZONE_0]->GetWrt_Sol_Freq_DualTime() == 0))) ||
+        
+        ((config_container[ZONE_0]->GetUnsteady_Simulation() == DT_STEPPING_2ND) &&
+         ((ExtIter == 0) || ((ExtIter % config_container[ZONE_0]->GetWrt_Sol_Freq_DualTime() == 0) ||
+                             ((ExtIter-1) % config_container[ZONE_0]->GetWrt_Sol_Freq_DualTime() == 0))))) {
           
           /*--- Low-fidelity simulations (using a coarser multigrid level
            approximation to the solution) require an interpolation back to the
@@ -471,6 +475,8 @@ int main(int argc, char *argv[]) {
             solver_container[ZONE_0][MESH_0][config_container[ZONE_0]->GetContainerPosition(RUNTIME_FLOW_SYS)]->Set_MPI_Solution(geometry_container[ZONE_0][MESH_0], config_container[ZONE_0]);
             solver_container[ZONE_0][MESH_0][config_container[ZONE_0]->GetContainerPosition(RUNTIME_FLOW_SYS)]->Preprocessing(geometry_container[ZONE_0][MESH_0], solver_container[ZONE_0][MESH_0], config_container[ZONE_0], MESH_0, 0, RUNTIME_FLOW_SYS, false);
           }
+          
+          if (rank == MASTER_NODE) cout << endl << "-------------------------- File Output Summary --------------------------";
           
           /*--- Execute the routine for writing restart, volume solution,
            surface solution, and surface comma-separated value files. ---*/
@@ -489,7 +495,7 @@ int main(int argc, char *argv[]) {
                                      geometry_container[ZONE_0][MESH_0], config_container[ZONE_0], ExtIter);
           }
           
-          if (rank == MASTER_NODE) cout << endl;
+          if (rank == MASTER_NODE) cout << "-------------------------------------------------------------------------" << endl << endl;
           
         }
     
@@ -504,7 +510,6 @@ int main(int argc, char *argv[]) {
   /*--- Output some information to the console. ---*/
   
   if (rank == MASTER_NODE) {
-    cout << endl;
     
     /*--- Print out the number of non-physical points and reconstructions ---*/
     
@@ -553,7 +558,7 @@ int main(int argc, char *argv[]) {
   
 #ifdef HAVE_MPI
   /*--- Finalize MPI parallelization ---*/
-  MPI_Buffer_detach(&bptr,&bl);
+  MPI_Buffer_detach(&bptr, &bl);
   MPI_Finalize();
 #endif
   

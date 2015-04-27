@@ -2,9 +2,9 @@
  * gas_model.hpp
  * \brief Headers of the main thermodynamic subroutines of the SU2 solvers.
  * \author S. Vitale, G. Gori, M. Pini, A. Guardone, P. Colonna
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -50,7 +50,7 @@ using namespace std;
  * \brief Main class for defining the Thermo-Physical Model
  * a child class for each particular Model (Ideal-Gas, Van der Waals, etc.)
  * \author: S.Vitale, G.Gori, M.Pini
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CFluidModel {
 protected:
@@ -191,7 +191,7 @@ public:
 
 		/*!
 		 * \brief virtual member that would be different for each gas model implemented
-		 * \param[in] InputSpec - Input pair for FLP calls ("e,rho").
+		 * \param[in] InputSpec - Input pair for FLP calls ("e, rho").
 		 * \param[in] rho - first thermodynamic variable.
 		 * \param[in] e - second thermodynamic variable.
 		 */
@@ -252,7 +252,7 @@ public:
  * \class CIdealGas
  * \brief Child class for defining ideal gas model.
  * \author: S.Vitale, M.Pini.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CIdealGas : public CFluidModel {
 
@@ -282,7 +282,7 @@ public:
 
 		/*!
 		 * \brief virtual member that would be different for each gas model implemented
-		 * \param[in] InputSpec - Input pair for FLP calls ("e,rho").
+		 * \param[in] InputSpec - Input pair for FLP calls ("e, rho").
 		 * \param[in] rho - first thermodynamic variable.
 		 * \param[in] e - second thermodynamic variable.
 		 */
@@ -341,7 +341,7 @@ public:
  * derived class CVanDerWaalsGas
  * \brief Child class for defining the Van der Waals model.
  * \author: S.Vitale, M.Pini
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CVanDerWaalsGas : public CIdealGas {
 
@@ -419,7 +419,7 @@ public:
  * \derived class CPengRobinson
  * \brief Child class for defining the Peng-Robinson model.
  * \author: S.Vitale, G. Gori
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CPengRobinson : public CIdealGas {
 

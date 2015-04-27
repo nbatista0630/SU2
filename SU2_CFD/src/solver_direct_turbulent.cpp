@@ -2,9 +2,9 @@
  * \file solution_direct_turbulent.cpp
  * \brief Main subrotuines for solving direct problems
  * \author F. Palacios, A. Bueno
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -452,7 +452,7 @@ void CTurbSolver::Upwind_Residual(CGeometry *geometry, CSolver **solver_containe
     
     Turb_i = node[iPoint]->GetSolution();
     Turb_j = node[jPoint]->GetSolution();
-    numerics->SetTurbVar(Turb_i,Turb_j);
+    numerics->SetTurbVar(Turb_i, Turb_j);
     
     /*--- Grid Movement ---*/
     
@@ -569,7 +569,7 @@ void CTurbSolver::Viscous_Residual(CGeometry *geometry, CSolver **solver_contain
     
     /*--- Menter's first blending function (only SST)---*/
     if (config->GetKind_Turb_Model() == SST)
-      numerics->SetF1blending(node[iPoint]->GetF1blending(),node[jPoint]->GetF1blending());
+      numerics->SetF1blending(node[iPoint]->GetF1blending(), node[jPoint]->GetF1blending());
     
     /*--- Compute residual, and Jacobians ---*/
     
@@ -631,7 +631,7 @@ void CTurbSolver::ImplicitEuler_Iteration(CGeometry *geometry, CSolver **solver_
     /*--- Modify matrix diagonal to assure diagonal dominance ---*/
     
     Delta = Vol / (config->GetCFLRedCoeff_Turb()*solver_container[FLOW_SOL]->node[iPoint]->GetDelta_Time());
-    Jacobian.AddVal2Diag(iPoint,Delta);
+    Jacobian.AddVal2Diag(iPoint, Delta);
     
     /*--- Right hand side of the system (-Residual) and initial guess (x = 0) ---*/
     
@@ -1018,9 +1018,11 @@ CTurbSASolver::CTurbSASolver(CGeometry *geometry, CConfig *config, unsigned shor
     
     /*--- Define some auxiliar vector related with the residual ---*/
     
-    Residual = new double[nVar]; Residual_RMS = new double[nVar];
-    Residual_i = new double[nVar]; Residual_j = new double[nVar];
-    Residual_Max = new double[nVar];
+    Residual = new double[nVar];     for (iVar = 0; iVar < nVar; iVar++) Residual[iVar]  = 0.0;
+    Residual_RMS = new double[nVar]; for (iVar = 0; iVar < nVar; iVar++) Residual_RMS[iVar]  = 0.0;
+    Residual_i = new double[nVar];   for (iVar = 0; iVar < nVar; iVar++) Residual_i[iVar]  = 0.0;
+    Residual_j = new double[nVar];   for (iVar = 0; iVar < nVar; iVar++) Residual_j[iVar]  = 0.0;
+    Residual_Max = new double[nVar]; for (iVar = 0; iVar < nVar; iVar++) Residual_Max[iVar]  = 0.0;
     
     /*--- Define some structures for locating max residuals ---*/
     
@@ -1173,7 +1175,7 @@ CTurbSASolver::CTurbSASolver(CGeometry *geometry, CConfig *config, unsigned shor
     /*--- The first line is the header ---*/
     getline (restart_file, text_line);
     
-    while (getline (restart_file,text_line)) {
+    while (getline (restart_file, text_line)) {
       istringstream point_line(text_line);
       
       /*--- Retrieve local index. If this node from the restart file lives
@@ -2013,7 +2015,7 @@ void CTurbSASolver::BC_Engine_Bleed(CGeometry *geometry, CSolver **solver_contai
 }
 
 void CTurbSASolver::BC_Interface_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics,
-                                          CConfig *config, unsigned short val_marker) {
+                                          CConfig *config) {
   //  unsigned long iVertex, iPoint, jPoint;
   //  unsigned short iVar, iDim;
   //
@@ -2175,7 +2177,7 @@ void CTurbSASolver::BC_Interface_Boundary(CGeometry *geometry, CSolver **solver_
 }
 
 void CTurbSASolver::BC_NearField_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics,
-                                          CConfig *config, unsigned short val_marker) {
+                                          CConfig *config) {
   //  unsigned long iVertex, iPoint, jPoint;
   //  unsigned short iVar, iDim;
   //
@@ -2387,7 +2389,7 @@ void CTurbSASolver::LoadRestart(CGeometry **geometry, CSolver ***solver, CConfig
   /*--- The first line is the header ---*/
   getline (restart_file, text_line);
   
-  while (getline (restart_file,text_line)) {
+  while (getline (restart_file, text_line)) {
     istringstream point_line(text_line);
     
     /*--- Retrieve local index. If this node from the restart file lives
@@ -2476,29 +2478,37 @@ CTurbSSTSolver::CTurbSSTSolver(CGeometry *geometry, CConfig *config, unsigned sh
 #endif
   
   /*--- Array initialization ---*/
+  
   constants = NULL;
   
   Gamma = config->GetGamma();
   Gamma_Minus_One = Gamma - 1.0;
   
   /*--- Dimension of the problem --> dependent of the turbulent model ---*/
+  
   nVar = 2;
   nPoint = geometry->GetnPoint();
   nPointDomain = geometry->GetnPointDomain();
   
   /*--- Define geometry constants in the solver structure ---*/
+  
   nDim = geometry->GetnDim();
   node = new CVariable*[nPoint];
   
   /*--- Single grid simulation ---*/
+  
   if (iMesh == MESH_0) {
     
     /*--- Define some auxiliary vector related with the residual ---*/
-    Residual = new double[nVar]; Residual_RMS = new double[nVar];
-    Residual_i = new double[nVar]; Residual_j = new double[nVar];
-    Residual_Max = new double[nVar];
+    
+    Residual = new double[nVar];     for (iVar = 0; iVar < nVar; iVar++) Residual[iVar]  = 0.0;
+    Residual_RMS = new double[nVar]; for (iVar = 0; iVar < nVar; iVar++) Residual_RMS[iVar]  = 0.0;
+    Residual_i = new double[nVar];   for (iVar = 0; iVar < nVar; iVar++) Residual_i[iVar]  = 0.0;
+    Residual_j = new double[nVar];   for (iVar = 0; iVar < nVar; iVar++) Residual_j[iVar]  = 0.0;
+    Residual_Max = new double[nVar]; for (iVar = 0; iVar < nVar; iVar++) Residual_Max[iVar]  = 0.0;
     
     /*--- Define some structures for locating max residuals ---*/
+    
     Point_Max = new unsigned long[nVar];
     for (iVar = 0; iVar < nVar; iVar++) Point_Max[iVar] = 0;
     Point_Max_Coord = new double*[nVar];
@@ -2508,16 +2518,20 @@ CTurbSSTSolver::CTurbSSTSolver(CGeometry *geometry, CConfig *config, unsigned sh
     }
     
     /*--- Define some auxiliary vector related with the solution ---*/
+    
     Solution = new double[nVar];
     Solution_i = new double[nVar]; Solution_j = new double[nVar];
     
     /*--- Define some auxiliary vector related with the geometry ---*/
+    
     Vector_i = new double[nDim]; Vector_j = new double[nDim];
     
     /*--- Define some auxiliary vector related with the flow solution ---*/
+    
     FlowPrimVar_i = new double [nDim+7]; FlowPrimVar_j = new double [nDim+7];
     
     /*--- Jacobians and vector structures for implicit computations ---*/
+    
     Jacobian_i = new double* [nVar];
     Jacobian_j = new double* [nVar];
     for (iVar = 0; iVar < nVar; iVar++) {
@@ -2526,6 +2540,7 @@ CTurbSSTSolver::CTurbSSTSolver(CGeometry *geometry, CConfig *config, unsigned sh
     }
     
     /*--- Initialization of the structure of the whole Jacobian ---*/
+    
     if (rank == MASTER_NODE) cout << "Initialize Jacobian structure (SST model)." << endl;
     Jacobian.Initialize(nPoint, nPointDomain, nVar, nVar, true, geometry, config);
     
@@ -2540,6 +2555,7 @@ CTurbSSTSolver::CTurbSSTSolver(CGeometry *geometry, CConfig *config, unsigned sh
   }
   
   /*--- Computation of gradients by least squares ---*/
+  
   if (config->GetKind_Gradient_Method() == WEIGHTED_LEAST_SQUARES) {
     /*--- S matrix := inv(R)*traspose(inv(R)) ---*/
     Smatrix = new double* [nDim];
@@ -2644,7 +2660,7 @@ CTurbSSTSolver::CTurbSSTSolver(CGeometry *geometry, CConfig *config, unsigned sh
     getline (restart_file, text_line);
     
     
-    while (getline (restart_file,text_line)) {
+    while (getline (restart_file, text_line)) {
       istringstream point_line(text_line);
       
       /*--- Retrieve local index. If this node from the restart file lives
@@ -2767,7 +2783,7 @@ void CTurbSSTSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
     
     kine  = node[iPoint]->GetSolution(0);
     omega = node[iPoint]->GetSolution(1);
-    zeta = min(1.0/omega,a1/(strMag*F2));
+    zeta = min(1.0/omega, a1/(strMag*F2));
     muT = min(max(rho*kine*zeta,0.0),1.0);
     node[iPoint]->SetmuT(muT);
     
@@ -2827,7 +2843,7 @@ void CTurbSSTSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
     /*--- Subtract residual and the Jacobian ---*/
     
     LinSysRes.SubtractBlock(iPoint, Residual);
-    Jacobian.SubtractBlock(iPoint,iPoint,Jacobian_i);
+    Jacobian.SubtractBlock(iPoint, iPoint, Jacobian_i);
     
   }
   
@@ -3090,7 +3106,7 @@ void CTurbSSTSolver::BC_Inlet(CGeometry *geometry, CSolver **solver_container, C
       visc_numerics->SetTurbVarGradient(node[iPoint]->GetGradient(), node[iPoint]->GetGradient());
       
       /*--- Menter's first blending function ---*/
-      visc_numerics->SetF1blending(node[iPoint]->GetF1blending(),node[iPoint]->GetF1blending());
+      visc_numerics->SetF1blending(node[iPoint]->GetF1blending(), node[iPoint]->GetF1blending());
       
       /*--- Compute residual, and Jacobians ---*/
       visc_numerics->ComputeResidual(Residual, Jacobian_i, Jacobian_j, config);
@@ -3176,7 +3192,7 @@ void CTurbSSTSolver::BC_Outlet(CGeometry *geometry, CSolver **solver_container, 
       visc_numerics->SetTurbVarGradient(node[iPoint]->GetGradient(), node[iPoint]->GetGradient());
       
       /*--- Menter's first blending function ---*/
-      visc_numerics->SetF1blending(node[iPoint]->GetF1blending(),node[iPoint]->GetF1blending());
+      visc_numerics->SetF1blending(node[iPoint]->GetF1blending(), node[iPoint]->GetF1blending());
       
       /*--- Compute residual, and Jacobians ---*/
       visc_numerics->ComputeResidual(Residual, Jacobian_i, Jacobian_j, config);
@@ -3375,7 +3391,7 @@ CTurbMLSolver::CTurbMLSolver(CGeometry *geometry, CConfig *config, unsigned shor
     /*--- The first line is the header ---*/
     getline (restart_file, text_line);
     
-    while (getline (restart_file,text_line)) {
+    while (getline (restart_file, text_line)) {
       istringstream point_line(text_line);
       
       /*--- Retrieve local index. If this node from the restart file lives
@@ -3550,7 +3566,7 @@ void CTurbMLSolver::Source_Residual(CGeometry *geometry, CSolver **solver_contai
     numerics->SetDistance(geometry->node[iPoint]->GetWall_Distance(), 0.0);
     
     /*--- Set coordinates ---*/
-    numerics->SetCoord(geometry->node[iPoint]->GetCoord(),geometry->node[iPoint]->GetCoord());
+    numerics->SetCoord(geometry->node[iPoint]->GetCoord(), geometry->node[iPoint]->GetCoord());
     
     /*--- Compute the source term ---*/
     numerics->ComputeResidual(Residual, Jacobian_i, NULL, config);
@@ -4024,7 +4040,7 @@ void CTurbMLSolver::LoadRestart(CGeometry **geometry, CSolver ***solver, CConfig
   /*--- The first line is the header ---*/
   getline (restart_file, text_line);
   
-  while (getline (restart_file,text_line)) {
+  while (getline (restart_file, text_line)) {
     istringstream point_line(text_line);
     
     /*--- Retrieve local index. If this node from the restart file lives

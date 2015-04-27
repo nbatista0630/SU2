@@ -2,9 +2,9 @@
  * \file numerics_template.cpp
  * \brief This file contains all the convective term discretization.
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -142,7 +142,7 @@ void CConvective_Template::ComputeResidual(double *val_residual, double **val_Ja
   /*--- Flow eigenvalues and Entropy correctors ---*/
   for (iDim = 0; iDim < nDim; iDim++) {
     Lambda[iDim] = ProjVelocity;
-    Epsilon[iDim] = 4.0*max(0.0, max(Lambda[iDim]-ProjVelocity_i,ProjVelocity_j-Lambda[iDim]));
+    Epsilon[iDim] = 4.0*max(0.0, max(Lambda[iDim]-ProjVelocity_i, ProjVelocity_j-Lambda[iDim]));
   }
   Lambda[nVar-2]  = ProjVelocity + RoeSoundSpeed;
   Epsilon[nVar-2] = 4.0*max(0.0, max(Lambda[nVar-2]-(ProjVelocity_i+SoundSpeed_i),(ProjVelocity_j+SoundSpeed_j)-Lambda[nVar-2]));

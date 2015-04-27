@@ -5,9 +5,9 @@
  *        <i>solution_direct.cpp</i>, <i>solution_adjoint.cpp</i>, and
  *        <i>solution_linearized.cpp</i> files.
  * \author F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  *
- * SU2 Lead Developers: Dr. Francisco Palacios (fpalacios@stanford.edu).
+ * SU2 Lead Developers: Dr. Francisco Palacios (francisco.palacios@boeing.com).
  *                      Dr. Thomas D. Economon (economon@stanford.edu).
  *
  * SU2 Developers: Prof. Juan J. Alonso's group at Stanford University.
@@ -62,7 +62,7 @@ using namespace std;
  * \brief Main class for defining the PDE solution, it requires
  * a child class for each particular solver (Euler, Navier-Stokes, etc.)
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CSolver {
 protected:
@@ -313,7 +313,7 @@ public:
 	 * \param[in] val_var - Index of the variable.
 	 * \param[in] val_residual - Value of the residual to store in the position <i>val_var</i>.
    * \param[in] val_point - Value of the point index for the max residual.
-   * \param[in] val_coord - Location (x,y,z) of the max residual point.
+   * \param[in] val_coord - Location (x, y, z) of the max residual point.
 	 */
 	void AddRes_Max(unsigned short val_var, double val_residual, unsigned long val_point, double* val_coord);
     
@@ -334,7 +334,7 @@ public:
   /*!
    * \brief Get the location of the maximal residual, this is useful for the convergence history.
    * \param[in] val_var - Index of the variable.
-   * \return Pointer to the location (x,y,z) of the biggest residual for the variable <i>val_var</i>.
+   * \return Pointer to the location (x, y, z) of the biggest residual for the variable <i>val_var</i>.
    */
   double* GetPoint_Max_Coord(unsigned short val_var);
   
@@ -662,8 +662,7 @@ public:
 	 * \param[in] config - Definition of the particular problem.
 	 * \param[in] val_marker - Surface marker where the boundary condition is applied.
 	 */
-	virtual void BC_Interface_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, CConfig *config,
-                                       unsigned short val_marker);
+	virtual void BC_Interface_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, CConfig *config);
     
 	/*!
 	 * \brief A virtual member.
@@ -673,8 +672,7 @@ public:
 	 * \param[in] config - Definition of the particular problem.
 	 * \param[in] val_marker - Surface marker where the boundary condition is applied.
 	 */
-	virtual void BC_NearField_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, CConfig *config,
-                                       unsigned short val_marker);
+	virtual void BC_NearField_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, CConfig *config);
   
   /*!
 	 * \brief A virtual member.
@@ -2158,6 +2156,18 @@ public:
 	 * \param[in] fea_config - Geometrical definition of the problem.
 	 * \param[in] fea_geometry - Definition of the particular problem.
 	 */
+	virtual void ComputeAitken_Coefficient(CGeometry **fea_geometry,
+            				  CConfig *fea_config,
+            				  CSolver ***fea_solution,
+            				  unsigned long iFSIIter);
+
+
+	/*!
+	 * \brief A virtual member.
+	 * \param[in] fea_geometry - Geometrical definition of the problem.
+	 * \param[in] fea_config - Geometrical definition of the problem.
+	 * \param[in] fea_geometry - Definition of the particular problem.
+	 */
 	virtual void SetAitken_Relaxation(CGeometry **fea_geometry,
             						  CConfig *fea_config,
             						  CSolver ***fea_solution);
@@ -2236,7 +2246,7 @@ public:
   * \param[in] lambda - The eigenvalues of the generalized eigensystem.
   * \param[in] config - Definition of the particular problem.
   */
-  void SetUpTypicalSectionWingModel(double (&PHI)[2][2],double (&lambda)[2], CConfig *config);
+  void SetUpTypicalSectionWingModel(double (&PHI)[2][2], double (&lambda)[2], CConfig *config);
     
   /*!
   * \brief Solve the typical section wing model.
@@ -2313,6 +2323,30 @@ public:
 	 */
 	virtual void SetSolution_time_n(CGeometry *geometry, CConfig *config);
 
+	/*!
+	 * \brief A virtual member.
+	 * \return Value of the dynamic Aitken relaxation factor
+	 */
+	virtual double GetWAitken_Dyn(void);
+
+	/*!
+	 * \brief A virtual member.
+	 * \return Value of the last Aitken relaxation factor in the previous time step.
+	 */
+	virtual double GetWAitken_Dyn_tn1(void);
+
+	/*!
+	 * \brief A virtual member.
+	 * \param[in] Value of the dynamic Aitken relaxation factor
+	 */
+	virtual void SetWAitken_Dyn(double waitk);
+
+	/*!
+	 * \brief A virtual member.
+	 * \param[in] Value of the last Aitken relaxation factor in the previous time step.
+	 */
+	virtual void SetWAitken_Dyn_tn1(double waitk_tn1);
+
 
 };
 
@@ -2320,7 +2354,7 @@ public:
  * \class CBaselineSolver
  * \brief Main class for defining a baseline solution from a restart file (for output).
  * \author F. Palacios, T. Economon.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CBaselineSolver : public CSolver {
 public:
@@ -2365,7 +2399,7 @@ public:
  * \brief Main class for defining the Euler's flow solver.
  * \ingroup Euler_Equations
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CEulerSolver : public CSolver {
 protected:
@@ -2881,7 +2915,7 @@ public:
 	 * \param[in] val_marker - Surface marker where the boundary condition is applied.
 	 */
 	void BC_Interface_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics,
-                               CConfig *config, unsigned short val_marker);
+                               CConfig *config);
     
 	/*!
 	 * \brief Impose the near-field boundary condition using the residual.
@@ -2892,7 +2926,7 @@ public:
 	 * \param[in] val_marker - Surface marker where the boundary condition is applied.
 	 */
 	void BC_NearField_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics,
-                               CConfig *config, unsigned short val_marker);
+                               CConfig *config);
   
   /*!
 	 * \brief Impose the actuator disk boundary condition using the residual.
@@ -3699,7 +3733,7 @@ public:
  * \brief Main class for defining the Navier-Stokes flow solver.
  * \ingroup Navier_Stokes_Equations
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CNSSolver : public CEulerSolver {
 private:
@@ -3963,7 +3997,7 @@ public:
  * \brief Main class for defining the turbulence model solver.
  * \ingroup Turbulence_Model
  * \author A. Bueno.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CTurbSolver : public CSolver {
 protected:
@@ -4092,7 +4126,7 @@ public:
  * \brief Main class for defining the turbulence model solver.
  * \ingroup Turbulence_Model
  * \author A. Bueno.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 
 class CTurbSASolver: public CTurbSolver {
@@ -4265,7 +4299,7 @@ public:
 	 * \param[in] val_marker - Surface marker where the boundary condition is applied.
 	 */
 	void BC_Interface_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics,
-                               CConfig *config, unsigned short val_marker);
+                               CConfig *config);
     
 	/*!
 	 * \brief Impose the near-field boundary condition using the residual.
@@ -4276,7 +4310,7 @@ public:
 	 * \param[in] val_marker - Surface marker where the boundary condition is applied.
 	 */
 	void BC_NearField_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics,
-                               CConfig *config, unsigned short val_marker);
+                               CConfig *config);
   
   /*!
 	 * \brief Load a solution from a restart file.
@@ -4295,7 +4329,7 @@ public:
  * \brief Main class for defining the turbulence model solver.
  * \ingroup Turbulence_Model
  * \author B. Tracey.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 
 class CTurbMLSolver: public CTurbSolver {
@@ -4441,7 +4475,7 @@ public:
  * \brief Main class for defining the turbulence model solver.
  * \ingroup Turbulence_Model
  * \author A. Aranake.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 
 class CTransLMSolver: public CTurbSolver {
@@ -4621,7 +4655,7 @@ public:
  * \brief Main class for defining the turbulence model solver.
  * \ingroup Turbulence_Model
  * \author A. Campos, F. Palacios, T. Economon
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 
 class CTurbSSTSolver: public CTurbSolver {
@@ -4764,7 +4798,7 @@ public:
  * \brief Main class for defining the Euler's adjoint flow solver.
  * \ingroup Euler_Equations
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CAdjEulerSolver : public CSolver {
 protected:
@@ -4989,8 +5023,7 @@ public:
 	 * \param[in] config - Definition of the particular problem.
 	 * \param[in] val_marker - Surface marker where the boundary condition is applied.
 	 */
-	void BC_Interface_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, CConfig *config,
-                               unsigned short val_marker);
+	void BC_Interface_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, CConfig *config);
     
 	/*!
 	 * \brief Impose via the residual the near-field adjoint boundary condition.
@@ -5000,8 +5033,7 @@ public:
 	 * \param[in] config - Definition of the particular problem.
 	 * \param[in] val_marker - Surface marker where the boundary condition is applied.
 	 */
-	void BC_NearField_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, CConfig *config,
-                               unsigned short val_marker);
+	void BC_NearField_Boundary(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics, CConfig *config);
     
 	/*!
 	 * \brief Impose via the residual the adjoint symmetry boundary condition.
@@ -5244,7 +5276,7 @@ public:
  * \brief Main class for defining the Navier-Stokes' adjoint flow solver.
  * \ingroup Navier_Stokes_Equations
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CAdjNSSolver : public CAdjEulerSolver {
 public:
@@ -5351,7 +5383,7 @@ public:
  * \brief Main class for defining the adjoint turbulence model solver.
  * \ingroup Turbulence_Model
  * \author F. Palacios, A. Bueno.
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CAdjTurbSolver : public CSolver {
 private:
@@ -5497,7 +5529,7 @@ public:
  * \brief Main class for defining the linearized Euler solver.
  * \ingroup Euler_Equations
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CLinEulerSolver : public CSolver {
 private:
@@ -5621,7 +5653,7 @@ public:
 /*! \class CPoissonSolver
  *  \brief Main class for defining the poisson potential solver.
  *  \author F. Palacios
- *  \version 3.2.8.2 "eagle"
+ *  \version 3.2.9 "eagle"
  *  \date May 3, 2010.
  */
 class CPoissonSolver : public CSolver {
@@ -5757,7 +5789,7 @@ public:
 /*! \class CWaveSolver
  *  \brief Main class for defining the wave solver.
  *  \author F. Palacios
- *  \version 3.2.8.2 "eagle"
+ *  \version 3.2.9 "eagle"
  *  \date May 3, 2010.
  */
 class CWaveSolver : public CSolver {
@@ -5912,7 +5944,7 @@ public:
 /*! \class CHeatSolver
  *  \brief Main class for defining the heat solver.
  *  \author F. Palacios
- *  \version 3.2.8.2 "eagle"
+ *  \version 3.2.9 "eagle"
  *  \date May 3, 2010.
  */
 class CHeatSolver : public CSolver {
@@ -6032,7 +6064,7 @@ public:
 /*! \class CFEASolver
  *  \brief Main class for defining the FEA solver.
  *  \author F. Palacios, R. Sanchez.
- *  \version 3.2.8.2 "eagle"
+ *  \version 3.2.9 "eagle"
  *  \date May 3, 2010.
  */
 class CFEASolver : public CSolver {
@@ -6062,7 +6094,10 @@ private:
 
   double a_dt[8];			/*!< \brief Integration constants. */
 
-	double FSI_Conv[2];		/*!< \brief Values to check the convergence of the FSI problem. */
+  double WAitken_Dyn;			/*!< \brief Aitken's dynamic coefficient */
+  double WAitken_Dyn_tn1;		/*!< \brief Aitken's dynamic coefficient in the previous iteration */
+
+  double FSI_Conv[2];		/*!< \brief Values to check the convergence of the FSI problem. */
 
 
 
@@ -6256,7 +6291,7 @@ public:
 	 * \param[in] flow_solution - Container vector with all the solutions.
 	 * \param[in] fea_config - Definition of the particular problem.
 	 */
-	void SetFEA_Load(CSolver ***flow_solution, CGeometry **fea_geometry, CGeometry **flow_geometry, CConfig *fea_confi, CConfig *flow_config, CNumerics *fea_numerics);
+	void SetFEA_Load(CSolver ***flow_solution, CGeometry **fea_geometry, CGeometry **flow_geometry, CConfig *fea_config, CConfig *flow_config, CNumerics *fea_numerics);
     
 	/*!
 	 * \brief Set the initial condition for the FEA Equations.
@@ -6300,6 +6335,17 @@ public:
 	void PredictStruct_Displacement(CGeometry **fea_geometry,
                                 	CConfig *fea_config,
                                 	CSolver ***fea_solution);
+
+	/*!
+	 * \brief Computation of Aitken's coefficient.
+	 * \param[in] fea_geometry - Geometrical definition of the problem.
+	 * \param[in] fea_config - Geometrical definition of the problem.
+	 * \param[in] fea_geometry - Definition of the particular problem.
+	 */
+	void ComputeAitken_Coefficient(CGeometry **fea_geometry,
+            				  CConfig *fea_config,
+            				  CSolver ***fea_solution,
+            				  unsigned long iFSIIter);
 
 	/*!
 	 * \brief Aitken's relaxation of the solution.
@@ -6385,6 +6431,30 @@ public:
 	 */
 	void SetSolution_time_n(CGeometry *geometry, CConfig *config);
 
+	/*!
+	 * \brief Retrieve the value of the dynamic Aitken relaxation factor.
+	 * \return Value of the dynamic Aitken relaxation factor.
+	 */
+	double GetWAitken_Dyn(void);
+
+	/*!
+	 * \brief Retrieve the value of the last Aitken relaxation factor in the previous time step.
+	 * \return Value of the last Aitken relaxation factor in the previous time step.
+	 */
+	double GetWAitken_Dyn_tn1(void);
+
+	/*!
+	 * \brief Set the value of the dynamic Aitken relaxation factor
+	 * \param[in] Value of the dynamic Aitken relaxation factor
+	 */
+	void SetWAitken_Dyn(double waitk);
+
+	/*!
+	 * \brief Set the value of the last Aitken relaxation factor in the current time step.
+	 * \param[in] Value of the last Aitken relaxation factor in the current time step.
+	 */
+	void SetWAitken_Dyn_tn1(double waitk_tn1);
+
     
 };
 
@@ -6393,7 +6463,7 @@ public:
  * \brief Main class for defining the level set solver.
  * \ingroup LevelSet_Model
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CAdjLevelSetSolver : public CSolver {
 protected:
@@ -6577,7 +6647,7 @@ public:
  * \brief Main class for defining the template model solver.
  * \ingroup Template_Flow_Equation
  * \author F. Palacios
- * \version 3.2.8.2 "eagle"
+ * \version 3.2.9 "eagle"
  */
 class CTemplateSolver : public CSolver {
 private:
