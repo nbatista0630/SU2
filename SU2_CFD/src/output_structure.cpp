@@ -6335,7 +6335,7 @@ void COutput::SetResult_Files(CSolver ****solver_container, CGeometry ***geometr
             /*--- Write a FieldView ASCII file ---*/
             
             if (rank == MASTER_NODE) cout << "Writing FieldView ASCII file volume solution file." << endl;
-//            SetFieldViewASCII(config[iZone], geometry[iZone][MESH_0], iZone, val_nZone);
+            SetFieldViewASCII(config[iZone], geometry[iZone][MESH_0], iZone, val_nZone);
             DeallocateConnectivity(config[iZone], geometry[iZone][MESH_0], false);
             break;
             
@@ -6352,7 +6352,7 @@ void COutput::SetResult_Files(CSolver ****solver_container, CGeometry ***geometr
             /*--- Write a FieldView binary file ---*/
             
             if (rank == MASTER_NODE) cout << "Writing FieldView binary file volume solution file." << endl;
-//            SetFieldViewBinary(config[iZone], geometry[iZone][MESH_0], iZone, val_nZone);
+            SetFieldViewBinary(config[iZone], geometry[iZone][MESH_0], iZone, val_nZone);
             DeallocateConnectivity(config[iZone], geometry[iZone][MESH_0], false);
             break;
 
@@ -6492,7 +6492,7 @@ void COutput::SetBaselineResult_Files(CSolver **solver, CGeometry **geometry, CC
               /*--- Write a FieldView ASCII file ---*/
               
               if (rank == MASTER_NODE) cout << "Writing FieldView ASCII file (volume grid)." << endl;
-//              SetFieldViewASCII(config[iZone], geometry[iZone], iZone, val_nZone);
+              SetFieldViewASCII(config[iZone], geometry[iZone], iZone, val_nZone);
               DeallocateConnectivity(config[iZone], geometry[iZone], false);
               break;
               
@@ -6510,7 +6510,7 @@ void COutput::SetBaselineResult_Files(CSolver **solver, CGeometry **geometry, CC
               /*--- Write a binary binary file ---*/
               
               if (rank == MASTER_NODE) cout << "Writing FieldView ASCII file (volume grid)." << endl;
-//              SetFieldViewBinary(config[iZone], geometry[iZone], iZone, val_nZone);
+              SetFieldViewBinary(config[iZone], geometry[iZone], iZone, val_nZone);
               DeallocateConnectivity(config[iZone], geometry[iZone], false);
               break;
 
@@ -6691,7 +6691,7 @@ void COutput::SetMesh_Files(CGeometry **geometry, CConfig **config, unsigned sho
       
       /*--- Write a .su2 ASCII file ---*/
       
-      //if (su2_file) SetSU2_MeshASCII(config[iZone], geometry[iZone]);
+      if (su2_file) SetSU2_MeshASCII(config[iZone], geometry[iZone]);
       
       /*--- Deallocate connectivity ---*/
 
