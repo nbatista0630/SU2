@@ -703,7 +703,11 @@ void FEAIteration(COutput *output, CIntegration ***integration_container, CGeome
 
 		/*----------------- Update structural solver ----------------------*/
 
-		integration_container[iZone][FEA_SOL]->SetStructural_Solver(geometry_container[iZone][MESH_0], solver_container[iZone][MESH_0][FEA_SOL], config_container[iZone], MESH_0);
+		bool dynamic = (config_container[iZone]->GetDynamic_Analysis() == DYNAMIC);
+
+		if (dynamic){
+			integration_container[iZone][FEA_SOL]->SetStructural_Solver(geometry_container[iZone][MESH_0], solver_container[iZone][MESH_0][FEA_SOL], config_container[iZone], MESH_0);
+		}
 
 	}
   
